@@ -7,8 +7,8 @@ import string
 sg.theme('LightGrey1')
 
 
-tab1_layout =  [[sg.T('Output of Scan X',size=(190,20))]]
-tab2_layout =  [[sg.T('Output of Scan Y',size=(190,20))]]
+tab1_layout =  [[sg.T('Output of Scan X',size=(210,20), background_color=('lightgrey'))]]
+tab2_layout =  [[sg.T('Output of Scan Y',size=(210,20), background_color=('lightgrey'))]]
 
 contentRun = []
 contentScan = []
@@ -76,16 +76,14 @@ xmlCol = [
 
 #window layout
 layout = [
-
-        #Run Table    #HC
-        [sg.Text('Scan List', font=('none 16'),size=(20,1), pad=((0,650),(0,0))), sg.Text('Run List', font=('none 16'),size=(20,1))],
+        [sg.Text('Scan List', font=('none 16'),size=(20,1), pad=((0,620),(0,0))), sg.Text('Run List', font=('none 16'),size=(20,1))],
         #[sg.Column(NewSpinner)],
-        [sg.Column(scanCol, scrollable=True), sg.Column(runCol, scrollable=True)],
+        [sg.Column(scanCol,scrollable=True), sg.Column(runCol, scrollable=True)],
         [sg.Column(runConfigCol, pad=((0,20),(10,0))), sg.Column(xmlCol, pad=((0,0),(0,0)))],
-         #                                                    )],
-          #scan result table in tabs
-          [sg.TabGroup([[sg.Tab('Scan X', tab1_layout, tooltip='tip'), sg.Tab('Scan Y', tab2_layout)]], tooltip='TIP2')]
-          ]
+        #scan result table in tabs
+        [sg.TabGroup([[sg.Tab('Scan X', tab1_layout, background_color='lightgrey'), sg.Tab('Scan Y', tab2_layout, background_color=('lightgrey'))]])]
+
+        ]
 
 #create window
 window = sg.Window('SEA Tool Version 1.0 - Run', layout)
