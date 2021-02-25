@@ -27,9 +27,9 @@ headingsTool = ['Name of Tool', 'Description of Tool', 'Remove']
 
 contentTool = []
 for i in range(15):
-    contentTool.append([sg.Text('Name of Tool'), sg.Text('Description of Tool'), sg.Button('Remove')])
+    contentTool.append([sg.Text('Name of Tool 0000'), sg.Text('Description of Tool'), sg.Button('Remove')])
 
-toolCol = [[sg.Text('Name of Tool', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Tool', text_color= 'black', background_color= 'lightgrey'), sg.Text('Remove', text_color= 'black', background_color= 'lightgrey')],
+toolCol = [[sg.Text('Name of Tool ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Tool', text_color= 'black', background_color= 'lightgrey'), sg.Text('Remove', text_color= 'black', background_color= 'lightgrey')],
            contentTool[0],
            contentTool[1],
            contentTool[2],
