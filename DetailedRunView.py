@@ -31,15 +31,16 @@ headings = [str(data[0][x])+'     ..' for x in range(len(data[0]))]
 
 
 # ------ Window Layout ------
-layout = [[sg.Table(values=data[1:][:], headings=headings, max_col_width=25,
+layout = [[sg.Table(values=data[1:][:], headings= (headings), max_col_width=25,
                     # background_color='light blue',
                     auto_size_columns=True,
                     justification='right',
                     num_rows=20,
-                    alternating_row_color='lightyellow',
+                    alternating_row_color='blue',
                     key='-TABLE-',
-                    row_height=35,
-                    tooltip='This is a table')]]
+                    row_height=20,
+                    tooltip='This is a table')],
+            [sg.Text('My one-shot window.'), sg.Text('My one-shot window.', tooltip= 'woah'), ]]
 
 
 # ------ Create Window ------

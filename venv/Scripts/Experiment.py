@@ -1,39 +1,68 @@
 #!/usr/bin/env python
 import PySimpleGUI as sg
+import random
+import string
 
-# Yet another example of TabGroup element
+#theme
+sg.theme('LightGrey1')
 
-sg.theme('GreenTan')
-tab2_layout = [[sg.Text('This is inside tab 2')],
-               [sg.Text('Tabs can be anywhere now!')]]
+#stuff for table - will get this from DB
+def word():
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(10))
+def number(max_val=1000):
+    return random.randint(0, max_val)
 
-tab1_layout = [[sg.Text('Type something here and click button'), sg.Input(key='in')]]
+def make_table(num_rows, num_cols):
+    data = [[j for j in range(num_cols)] for i in range(num_rows)]
+    data[0] = [word() for __ in range(num_cols)]
+    for i in range(1, num_rows):
+        data[i] = [word(), *[number() for i in range(num_cols - 1)]]
+    return data
 
-tab3_layout = [[sg.Text('This is inside tab 3')]]
-tab4_layout = [[sg.Text('This is inside tab 4')]]
+#making the table
+data = make_table(num_rows=15, num_cols=4)
+data2 = make_table(num_rows=15, num_cols=8)
 
-tab_layout = [[sg.Text('This is inside of a tab')]]
-tab_group = sg.TabGroup([[sg.Tab('Tab 7', tab_layout), sg.Tab('Tab 8', tab_layout)]])
+headingsTool = ['Name of Tool', 'Description of Tool', 'Remove']
 
-tab5_layout = [[sg.Text('Watch this window')],
-                [sg.Output(size=(40,5))]]
-tab6_layout = [[sg.Text('This is inside tab 6')],
-               [sg.Text('How about a second row of stuff in tab 6?'), tab_group]]
+specCol = [
+        [sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
+        [sg.Text('Tool Name', size=(20,1)), sg.InputText('')],
+        [sg.Text('Tool Description', size=(20,1)), sg.InputText('')],
+        [sg.Text('Tool Path', size=(20,1)), sg.InputText(''), sg.Button('Browse')],
+        [sg.Text('Option and Argument', size=(20,1)), sg.InputText('')],
+        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText(''), sg.Button('Add')],
+        [sg.Text('OR', size=(20,1))],
+        [sg.Text('Tool Specification File', size=(20,1)), sg.InputText(''), sg.Button('Browse')]
+        ]
+toolListCol = [
+            #Run Table
+            [sg.Text('Tool List', font=('none 16'))],
+            [sg.Table(values=data[1:][:], headings=headingsTool, max_col_width=25,
+                # background_color='light blue',
+                auto_size_columns=True,
+                display_row_numbers=False,
+                justification='right',
+                num_rows=10,
+                #pad=((0,20),(0,0)),
+                alternating_row_color='lightgrey',
+                key='-TABLE1',
+                row_height=20,
+                tooltip='This is a table')]]
 
-layout = [[sg.Text('My Window!')], [sg.Frame('A Frame', layout=
-    [[sg.TabGroup([[sg.Tab('Tab 1', tab1_layout), sg.Tab('Tab 2', tab2_layout)]]), sg.TabGroup([[sg.Tab('Tab3', tab3_layout), sg.Tab('Tab 4', tab4_layout)]])]])],
-    [sg.Text('This text is on a row with a column'),sg.Col(layout=[[sg.Text('In a column')],
-    [sg.TabGroup([[sg.Tab('Tab 5', tab5_layout), sg.Tab('Tab 6', tab6_layout)]])],
-          [sg.Button('Click me')]])],]
+#window layout
+layout = [
+            [sg.Column(toolListCol), sg.Column(specCol, vertical_alignment='top')],
+            [sg.Text('Tool Dependency', font=('none 16'),size=(20,1))],
+            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText(''),sg.Button('Remove')],
+            [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('')],
+            [sg.Button('Add')]
 
-window = sg.Window('My window with tabs', layout, default_element_size=(12,1), finalize=True)
+        ]
 
-print('Are there enough tabs for you?')
 
-while True:
-    event, values = window.read()
-    print(event, values)
-    if event == sg.WIN_CLOSED:           # always,  always give a way out!
-        break
+#create window
+window = sg.Window('SEA Tool Version 1.0 - Tool', layout)
 
-window.close()
+#event loop
+event, values = window.read()

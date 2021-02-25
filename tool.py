@@ -25,6 +25,23 @@ data2 = make_table(num_rows=15, num_cols=8)
 
 headingsTool = ['Name of Tool', 'Description of Tool', 'Remove']
 
+contentTool = []
+for i in range(15):
+    contentTool.append([sg.Text('Scan'), sg.Text('Name of Scan'), sg.Text('Execution Number'), sg.Text('Start Time'), sg.Text('End Time'), sg.Text('Scanned IPs'), sg.Text('Sucessful Execution/Failure'), sg.Text('Control'),sg.Button('Start'), sg.Button('Pause'), sg.Button('Stop') ])
+
+toolCol = [[sg.Text('Scan', text_color= 'blue', background_color= 'black'), sg.Text('Name of Scan', text_color= 'blue', background_color= 'black'), sg.Text('Execution Number', text_color= 'blue', background_color= 'black'), sg.Text('Start Time', text_color= 'blue', background_color= 'black'), sg.Text('End Time', text_color= 'blue', background_color= 'black'), sg.Text('Scanned IPs', text_color= 'blue', background_color= 'black'), sg.Text('Sucessful Execution/Failure', text_color= 'blue', background_color= 'black'), sg.Text('Control', text_color= 'blue', background_color= 'black')],
+           contentTool[0],
+           contentTool[1],
+           contentTool[2],
+           contentTool[3],
+           contentTool[4],
+           contentTool[5],
+           contentTool[6],
+           contentTool[7],
+           contentTool[8],
+           contentTool[9]]
+
+
 specCol = [
         [sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
         [sg.Text('Tool Name', size=(20,1)), sg.InputText('')],
@@ -38,17 +55,7 @@ specCol = [
 toolListCol = [
             #Run Table
             [sg.Text('Tool List', font=('none 16'))],
-            [sg.Table(values=data[1:][:], headings=headingsTool, max_col_width=25,
-                # background_color='light blue',
-                auto_size_columns=True,
-                display_row_numbers=False,
-                justification='right',
-                num_rows=10,
-                #pad=((0,20),(0,0)),
-                alternating_row_color='lightgrey',
-                key='-TABLE1',
-                row_height=20,
-                tooltip='This is a table')]]
+            [sg.Column(toolCol, scrollable=True)]]
 
 #window layout
 layout = [
