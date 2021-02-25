@@ -27,9 +27,9 @@ headingsTool = ['Name of Tool', 'Description of Tool', 'Remove']
 
 contentTool = []
 for i in range(15):
-    contentTool.append([sg.Text('Scan'), sg.Text('Name of Scan'), sg.Text('Execution Number'), sg.Text('Start Time'), sg.Text('End Time'), sg.Text('Scanned IPs'), sg.Text('Sucessful Execution/Failure'), sg.Text('Control'),sg.Button('Start'), sg.Button('Pause'), sg.Button('Stop') ])
+    contentTool.append([sg.Text('Name of Tool'), sg.Text('Description of Tool'), sg.Button('Remove')])
 
-toolCol = [[sg.Text('Scan', text_color= 'blue', background_color= 'black'), sg.Text('Name of Scan', text_color= 'blue', background_color= 'black'), sg.Text('Execution Number', text_color= 'blue', background_color= 'black'), sg.Text('Start Time', text_color= 'blue', background_color= 'black'), sg.Text('End Time', text_color= 'blue', background_color= 'black'), sg.Text('Scanned IPs', text_color= 'blue', background_color= 'black'), sg.Text('Sucessful Execution/Failure', text_color= 'blue', background_color= 'black'), sg.Text('Control', text_color= 'blue', background_color= 'black')],
+toolCol = [[sg.Text('Name of Tool', text_color= 'blue', background_color= 'black'), sg.Text('Description of Tool', text_color= 'blue', background_color= 'black'), sg.Text('Remove', text_color= 'blue', background_color= 'black')],
            contentTool[0],
            contentTool[1],
            contentTool[2],

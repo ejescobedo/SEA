@@ -52,7 +52,7 @@ scanCol = [[sg.Text('Scan', text_color= 'blue', background_color= 'black'), sg.T
 #Run Spinners
 NewSpinner = []
 for i in range(4):
-    NewSpinner.append([sg.Input("Scan", size=(3, 1), font='Any 12', justification='r', key='-SPIN-'),
+    NewSpinner.append([sg.Input(headingsRun[i], size=(20, 1), font='Any 8', key='-SPIN-'),
                       sg.Column([[sg.Button('▲', size=(1, 1), font='Any 7', border_width=0,
                     button_color=(sg.theme_text_color(), sg.theme_background_color()), key='-UP-')],
                     [sg.Button('▼', size=(1, 1), font='Any 7', border_width=0,
@@ -106,8 +106,9 @@ xmlCol = [
 #window layout
 layout = [
 
-        #Run Table
-        [sg.Text('Run List', font=('none 16'),size=(20,1))],
+        #Run Table    #HC
+        [sg.Text('Scan List', font=('none 16'),size=(20,1), pad=((0,650),(0,0))), sg.Text('Run List', font=('none 16'),size=(20,1))],
+        #[sg.Column(NewSpinner)],
         [sg.Column(scanCol, scrollable=True), sg.Column(runColu, scrollable=True)],
         [sg.Column(runCol, pad=((0,20),(10,0))), sg.Column(xmlCol, pad=((0,0),(0,0)))],
          #                                                    )],
