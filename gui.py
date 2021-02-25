@@ -23,6 +23,8 @@ while True:
 
     if event == 'Run':
         os.system('python3 run.py')
+    if event == 'Tool':
+        os.system('python3 tool.py')
     if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
         break
 
