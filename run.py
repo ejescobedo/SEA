@@ -30,23 +30,24 @@ headingsRun = ['Name of Run', 'Description of Run', 'Result with Timestamp', 'Co
 headingsScan = ['Scan', 'Name of Scan', 'Execution Number', 'Start Time', 'End Time', 'Scanned IPs', 'Succesful Execution/Failure', 'Control']
 contentRun = []
 contentScan = []
-#Scan
-#Run Col
+
 
 for i in range(15):
-    contentScan.append([sg.Text('Scan'), sg.Text('Name of Scan'), sg.Text('Execution Number'), sg.Text('Start Time'), sg.Text('End Time'), sg.Text('Scanned IPs'), sg.Text('Sucessful Execution/Failure'), sg.Text('Control'),sg.Button('Start'), sg.Button('Pause'), sg.Button('Stop') ])
+    contentScan.append([sg.Text('Scan'), sg.Text('Name of Scan'), sg.Text('Execution Number'), sg.Text('Start Time'), sg.Text('End Time'), sg.Text('Scanned IPs'), sg.Text('Sucessful Execution/Failure'), sg.Button('Start'), sg.Button('Pause'), sg.Button('Stop') ])
 
-scanCol = [[sg.Text('Scan', text_color= 'blue', background_color= 'black'), sg.Text('Name of Scan', text_color= 'blue', background_color= 'black'), sg.Text('Execution Number', text_color= 'blue', background_color= 'black'), sg.Text('Start Time', text_color= 'blue', background_color= 'black'), sg.Text('End Time', text_color= 'blue', background_color= 'black'), sg.Text('Scanned IPs', text_color= 'blue', background_color= 'black'), sg.Text('Sucessful Execution/Failure', text_color= 'blue', background_color= 'black'), sg.Text('Control', text_color= 'blue', background_color= 'black')],
-           contentScan[0],
-           contentScan[1],
-           contentScan[2],
-           contentScan[3],
-           contentScan[4],
-           contentScan[5],
-           contentScan[6],
-           contentScan[7],
-           contentScan[8],
-           contentScan[9]]
+scanCol = [
+        #[sg.Text('Scan List', font=('none 16'),size=(20,1))],
+        [sg.Text('Scan     ' + chr(94), text_color= 'black', background_color= 'lightgrey'), sg.Text('Name of Scan', text_color= 'black', background_color= 'lightgrey'), sg.Text('Execution Number', text_color= 'black', background_color= 'lightgrey'), sg.Text('Start Time', text_color= 'black', background_color= 'lightgrey'), sg.Text('End Time', text_color= 'black', background_color= 'lightgrey'), sg.Text('Scanned IPs', text_color= 'black', background_color= 'lightgrey'), sg.Text('Sucessful Execution/Failure', text_color= 'black', background_color= 'lightgrey'), sg.Text('Control', text_color= 'black', background_color= 'lightgrey')],
+        contentScan[0],
+        contentScan[1],
+        contentScan[2],
+        contentScan[3],
+        contentScan[4],
+        contentScan[5],
+        contentScan[6],
+        contentScan[7],
+        contentScan[8],
+        contentScan[9]]
 
 
 #Run Spinners
@@ -63,21 +64,19 @@ for i in range(15):
 
 #[sg.Text('Name of Run', text_color= 'blue', background_color= 'black'), sg.Text('Description of Run', text_color= 'blue', background_color= 'black'), sg.Text('Result with Timestamp', text_color= 'blue', background_color= 'black'), sg.Text('Control', text_color= 'blue', background_color= 'black')],
 
-runColu = [[sg.Text('Name of Run', text_color= 'blue', background_color= 'black'), sg.Text('Description of Run', text_color= 'blue', background_color= 'black'), sg.Text('Result with Timestamp', text_color= 'blue', background_color= 'black'), sg.Text('Control', text_color= 'blue', background_color= 'black')],
-
-           contentRun[0],
-           contentRun[1],
-           contentRun[2],
-           contentRun[3],
-           contentRun[4],
-           contentRun[5],
-           contentRun[6],
-           contentRun[7],
-           contentRun[8],
-           contentRun[9]]
-
-
-
+runColu = [
+            #[sg.Text('Run List', font=('none 16'),size=(20,1))],
+            [sg.Text('Name of Run', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Run', text_color= 'black', background_color= 'lightgrey'), sg.Text('Result with Timestamp', text_color= 'black', background_color= 'lightgrey'), sg.Text('Control', text_color= 'black', background_color= 'lightgrey')],
+            contentRun[0],
+            contentRun[1],
+            contentRun[2],
+            contentRun[3],
+            contentRun[4],
+            contentRun[5],
+            contentRun[6],
+            contentRun[7],
+            contentRun[8],
+            contentRun[9]]
 
 
 runCol = [
@@ -117,7 +116,7 @@ layout = [
           ]
 
 #create window
-window = sg.Window('SEA Tool Version 1.0 - Run', layout, size=(1600, 1000))
+window = sg.Window('SEA Tool Version 1.0 - Run', layout)
 
 #event loop
 event, values = window.read()
