@@ -13,17 +13,32 @@ headingsTool = ['Name of Tool', 'Description of Tool', 'Remove']
 for i in range(15):
     contentTool.append([sg.Text('Name of Tool 0000'), sg.Text('Description of Tool'), sg.Button('Remove', button_color=('white','red'))])
 
-toolCol = [[sg.Text('Name of Tool ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Tool', text_color= 'black', background_color= 'lightgrey'), sg.Text('Remove', text_color= 'black', background_color= 'lightgrey')],
-           contentTool[0],
-           contentTool[1],
-           contentTool[2],
-           contentTool[3],
-           contentTool[4],
-           contentTool[5],
-           contentTool[6],
-           contentTool[7],
-           contentTool[8],
-           contentTool[9]]
+# toolCol = [[sg.Text('Name of Tool ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Tool', text_color= 'black', background_color= 'lightgrey'), sg.Text('Remove', text_color= 'black', background_color= 'lightgrey')],
+#            contentTool[0],
+#            contentTool[1],
+#            contentTool[2],
+#            contentTool[3],
+#            contentTool[4],
+#            contentTool[5],
+#            contentTool[6],
+#            contentTool[7],
+#            contentTool[8],
+#            contentTool[9]]
+
+data = [[]]
+toolCol = [
+        [sg.Table(values=data[1:][:], headings=headingsTool, max_col_width=25,
+                                # background_color='light blue',
+                                auto_size_columns=True,
+                                display_row_numbers=True,
+                                justification='right',
+                                num_rows=20,
+                                alternating_row_color='lightgrey',
+                                key='-TABLE-',
+                                row_height=35,
+                                tooltip='This is a table')],
+            ]
+
 specCol = [
         #[sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
         [sg.Text('Tool Name', size=(20,1)), sg.InputText('')],
