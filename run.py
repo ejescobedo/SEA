@@ -73,10 +73,10 @@ toolCol = [
                                 def_col_width = 90,
                                 display_row_numbers=True,
                                 justification='left',
-                                num_rows=20,
+                                num_rows=10,
                                 alternating_row_color='#ededed',
                                 key='-TABLE-',
-                                row_height=35, enable_events= True,
+                                row_height=25, enable_events= True,
                                 tooltip='This is a table')]]
 
 toolListCol = [
@@ -167,8 +167,8 @@ xmlCol = [
         [sg.Button('Generate', pad=((5,5),(30,5)), button_color=('black','white')), sg.Button('Cancel', button_color=('white','black'), pad=((5,5),(30,5)))]
         ]
 
-tab1_layout =  [[sg.T('Output of Scan X',size=(220,20))]]
-tab2_layout =  [[sg.T('Output of Scan Y',size=(210,20))]]
+tab1_layout =  [[sg.T('Output of Scan X',size=(220,15))]]
+tab2_layout =  [[sg.T('Output of Scan Y',size=(210,15))]]
 
 
 
