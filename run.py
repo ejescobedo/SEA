@@ -249,6 +249,8 @@ while True:
             collection.insert_one(data)
             for i in range (17, 22):
                 window[i].update("")
+        else:
+            sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
     if event == "-removeConfig-":
         if (values[17] != ""):
             remove_tool_list(values[17])
