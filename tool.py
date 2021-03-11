@@ -23,23 +23,57 @@ def make_table(num_rows, num_cols):
 data = make_table(num_rows=15, num_cols=4)
 data2 = make_table(num_rows=15, num_cols=8)
 
-headingsTool = ['Name of Tool', 'Description of Tool', 'Remove']
+import pymongo
+from bson import ObjectId
 
-contentTool = []
-for i in range(15):
-    contentTool.append([sg.Text('Name of Tool 0000'), sg.Text('Description of Tool'), sg.Button('Remove')])
+#theme
+sg.theme('LightGrey1')
 
-toolCol = [[sg.Text('Name of Tool ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Tool', text_color= 'black', background_color= 'lightgrey'), sg.Text('Remove', text_color= 'black', background_color= 'lightgrey')],
-           contentTool[0],
-           contentTool[1],
-           contentTool[2],
-           contentTool[3],
-           contentTool[4],
-           contentTool[5],
-           contentTool[6],
-           contentTool[7],
-           contentTool[8],
-           contentTool[9]]
+def remove_data(name):
+    document = collection.delete_one({'Name of Tool': name})
+    return document.acknowledged
+
+def get_multiple_data(collection):
+    """
+    get document data by document ID
+    :return:
+    """
+    data = collection.find()
+    return list(data)
+
+##Database
+connection = pymongo.MongoClient('localhost', 27017)
+database = connection['mydb_01']
+collection = database['Tool List']
+information = get_multiple_data(collection)
+
+#tool View
+data = []
+headingsTool = ['Name of Tool', 'Description of Tool']
+
+def make_table(num_cols):
+    data = []
+    i = 0
+    data = [[j for j in range(num_cols)] for i in range(len(information))]
+    for element in information:
+        data[i] = [element.get("Name of Tool"), element.get("Description of Tool")]
+        i += 1
+    return data
+
+# ------ Make the Table Data ------
+data = make_table(num_cols=3)
+
+toolCol = [
+        [sg.Table(values=data[:][:], headings=headingsTool, max_col_width=25,
+                                # background_color='light blue',
+                                auto_size_columns=True,
+                                display_row_numbers=True,
+                                justification='middle',
+                                num_rows=20,
+                                alternating_row_color='lightgrey',
+                                key='-TABLE-',
+                                row_height=35,
+                                tooltip='This is a table')]]
 
 
 specCol = [
@@ -48,7 +82,7 @@ specCol = [
         [sg.Text('Tool Description', size=(20,1)), sg.InputText('')],
         [sg.Text('Tool Path', size=(20,1)), sg.InputText(''), sg.Button('Browse')],
         [sg.Text('Option and Argument', size=(20,1)), sg.InputText('')],
-        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText(''), sg.Button('Add')],
+        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText(''), sg.Button('Add', key= '-addSpecification')],
         [sg.Text('OR', size=(20,1))],
         [sg.Text('Tool Specification File', size=(20,1)), sg.InputText(''), sg.Button('Browse')]
         ]
@@ -61,9 +95,9 @@ toolListCol = [
 layout = [
             [sg.Column(toolListCol), sg.Column(specCol, vertical_alignment='top')],
             [sg.Text('Tool Dependency', font=('none 16'),size=(20,1))],
-            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText(''),sg.Button('Remove')],
+            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText('')],
             [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('')],
-            [sg.Button('Add')]
+            [sg.Button('Add'),sg.Button('Remove')]
 
         ]
 
@@ -72,4 +106,37 @@ layout = [
 window = sg.Window('SEA Tool Version 1.0 - Tool', layout)
 
 #event loop
-event, values = window.read()
+while True:
+    event, values = window.read()
+    print(event, values)
+
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+    if event == 'Add':
+        print("Add clicked")
+        if ((values[0] != "") and (values[1] != "") and (values[2] != "") and (values[3] != "") and (values[4] != "")):
+            data = data = {"Name of Tool": values[0], "Description of Tool": values[1], "Path of Tool": values[2]
+                           , "Option and Agurment of Tool": values[3], "Output Data Specification of Tool"
+                           : values[4]}
+            collection.insert_one(data)
+            for i in range (5):
+                window[i].update("")
+        else:
+            sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
+    if event == "Add60":
+        if ((values[6] != "") and (values[7] != "") and (values[8] != "") and (values[9] != "")):
+            collection = database['Tool Dependency']
+            data = data = {"Dependent Data": values[6], "Operator": values[7],
+                           "Value": values[8]
+                , "Dependency Expression": values[9]}
+            collection.insert_one(data)
+            for i in range (6, 10):
+                window[i].update("")
+    if event == "Remove":
+        if (values[6] != ""):
+            remove_data(values[6])
+            window[6].update("")
+    if event == '-TABLE-':
+        print("Table clicked")
+        if event == '-removeConfig-':
+            print("We did it")
