@@ -37,7 +37,8 @@ def get_multiple_data(collection):
 connection = pymongo.MongoClient('localhost', 27017)
 database = connection['mydb_01']
 collection = database['Tool List']
-information = get_multiple_data(collection)
+
+#information = get_multiple_data(collection)
 
 
 #adding data to collection
@@ -48,10 +49,12 @@ sg.theme('LightGrey1')
 
 data = []
 headingsTool = ['Name of Tool', 'Description of Tool']
+headingsTool2 = ['dumb', 'yes']
 
 def make_table(num_cols):
     data = []
     i = 0
+    information = get_multiple_data(collection)
     data = [[j for j in range(num_cols)] for i in range(len(information))]
     for element in information:
         data[i] = [element.get("Name of Tool"), element.get("Description of Tool")]
@@ -63,36 +66,43 @@ data = make_table(num_cols=3)
 
 
 toolCol = [
-        [sg.Table(values=data[:][:], headings=headingsTool, max_col_width=25,
+        [sg.Table(values=data[:][:], headings=headingsTool, max_col_width=500,
                                 # background_color='light blue',
-                                auto_size_columns=True,
+                                auto_size_columns=False,
+                                col_widths = 90,
+                                def_col_width = 90,
                                 display_row_numbers=True,
-                                justification='right',
+                                justification='left',
                                 num_rows=20,
-                                alternating_row_color='lightgrey',
+                                alternating_row_color='#ededed',
                                 key='-TABLE-',
                                 row_height=35, enable_events= True,
                                 tooltip='This is a table')]]
 
-specCol = [
-        #[sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
-        [sg.Text('Tool Name', size=(20,1)), sg.InputText('')],
-        [sg.Text('Tool Description', size=(20,1)), sg.InputText('')],
-        [sg.Text('Tool Path', size=(20,1)), sg.InputText(''), sg.FileBrowse('Browse', key= '-toolPathBrowse-')],
-        [sg.Text('Option and Argument', size=(20,1)), sg.InputText('')],
-        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText(''), sg.Button('Add')],
-        [sg.Text('OR',font=('None 16'), size=(20,1))],
-        [sg.Text('Tool Specification File', pad=((5,5),(20,5)),size=(20,1)), sg.InputText(''), sg.FileBrowse('Browse', key= '-toolSpecificationFileBrowse')]
-        ]
 toolListCol = [
             #Run Table
             #[sg.Text('Tool List', font=('none 16'))],
-            [sg.Column(toolCol, scrollable=True)]]
+            [sg.Column(toolCol, scrollable=True)],
+            [sg.Text('Name of Tool', key='-toolConfigName-', size=(10,1)), sg.InputText('', key='-removeInput-'), sg.Button("Remove Configuration", button_color=('white', 'red'), key='-removeConfig-')]
+            ]
+
+specCol = [
+        #[sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
+        [sg.Text('Tool Name', size=(20,1)), sg.InputText('', key='-spec1-')],
+        [sg.Text('Tool Description', size=(20,1)), sg.InputText('', key='-spec2-')],
+        [sg.Text('Tool Path', size=(20,1)), sg.InputText('', key='-spec3-'), sg.FileBrowse('Browse', key= '-toolPathBrowse-')],
+        [sg.Text('Option and Argument', size=(20,1)), sg.InputText('', key='-spec4-')],
+        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText('',key='-spec5-'), sg.Button('Add', key='-addSpec-')],
+        [sg.Text('OR',font=('None 16'), size=(20,1))],
+        [sg.Text('Tool Specification File', pad=((5,5),(20,5)),size=(20,1)), sg.InputText(''), sg.FileBrowse('Browse', key= '-toolSpecificationFileBrowse')]
+        ]
+
+
 toolDepCol = [
             #[sg.Text('Tool Dependency', font=('none 16'),size=(20,1))],
-            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText('')],
-            [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('')],
-            [sg.Button('Add', key= '-addConfig-'), sg.Button('Remove', key='-removeDependency-')]
+            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], key='-toolData1-',size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], key='-toolData2-',size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText('',key='-toolData3-')],
+            [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('', key='-toolData4-')],
+            [sg.Button('Add', key= '-addConfig-'), sg.Button('Remove', button_color=('white', 'red'),key='-removeDependency-')]
             ]
 
 #run View
@@ -161,6 +171,7 @@ tab1_layout =  [[sg.T('Output of Scan X',size=(220,20))]]
 tab2_layout =  [[sg.T('Output of Scan Y',size=(210,20))]]
 
 
+
 outputTabCol = [
             [sg.TabGroup([[sg.Tab('Scan X', tab1_layout), sg.Tab('Scan Y', tab2_layout)]])]
             ]
@@ -206,8 +217,9 @@ run_tab_layout =  [
                 #[sg.TabGroup([[sg.Tab('Scan X', tab1_layout), sg.Tab('Scan Y', tab2_layout)]])]
                 ]
 tool_tab_layout =  [
-                [sg.Column(toolListFrame),  sg.Column(specColFrame, vertical_alignment='top')],
-                [sg.Text('Name of Tool', key='-toolConfigName-', size=(10,1)), sg.InputText(''), sg.Button("Remove Configuration", key='-removeConfig-')],                          #####Added buttons here
+                [sg.Column(toolListFrame)],
+
+                [sg.Column(specColFrame, vertical_alignment='top')],
                 [sg.Column(toolDepColFrame)]]
 
 
@@ -229,40 +241,53 @@ while True:
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
-    if event == 'Add60':
+    if event == '-addSpec-':
         print("Add clicked")
-        if ((values[11] != "") and (values[12] != "") and (values[13] != "")  and (values[14] != "") and values[15] != ""):
-            data = data = {"Name of Tool": values[11], "Description of Tool": values[12], "Path of Tool": values[13]
-                           , "Option and Argument of Tool": values[14], "Output Data Specification of Tool"
-                           : values[15]}
+        if ((values['-spec1-'] != "") and (values['-spec2-'] != "") and (values['-spec3-'] != "")  and (values['-spec4-'] != "") and values['-spec5-'] != ""):
+            data = data = {"Name of Tool": values['-spec1-'], "Description of Tool": values['-spec2-'], "Path of Tool": values['-spec3-']
+                           , "Option and Argument of Tool": values['-spec4-'], "Output Data Specification of Tool"
+                           : values['-spec5-']}
             collection.insert_one(data)
-            for i in range (11, 16):
-                window[i].update("")
+            data = make_table(3)
+            window.FindElement('-TABLE-').Update(values=data)
+
+            window['-spec1-'].update('')
+            window['-spec2-'].update('')
+            window['-spec3-'].update('')
+            window['-spec4-'].update('')
+            window['-spec5-'].update('')
+
+            # for i in range (11, 16):
+                # window[i].update("")
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
+
     if event == "-addConfig-":
-        if ((values[18] != "") and (values[19] != "") and (values[20] != "") and (values[21] != "")):
+        if ((values['-toolData1-'] != "") and (values['-toolData2-'] != "") and (values['-toolData3-'] != "") and (values['-toolData4-'] != "")):
             collection = database['Tool Dependency']
-            data = data = {"Dependent Data": values[18], "Operator": values[19],
-                           "Value": values[20]
-                , "Dependency Expression": values[21]}
+            data = data = {"Dependent Data": values['-toolData1-'], "Operator": values['-toolData2-'],
+                           "Value": values['-toolData3-']
+                , "Dependency Expression": values['-toolData4-']}
             collection.insert_one(data)
-            for i in range (17, 22):
-                window[i].update("")
+            window['-toolData1-'].update('')
+            window['-toolData2-'].update('')
+            window['-toolData3-'].update('')
+            window['-toolData4-'].update('')
+
+            # for i in range (17, 22):
+            #     window[i].update("")
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
     if event == "-removeConfig-":
-        if (values[17] != ""):
-            remove_tool_list(values[17])
-            window[17].update("")
+        #test = values['-removeInput-']
+        #print(test)
+        if (values["-removeInput-"] != ""):
+            remove_tool_list(values["-removeInput-"])
+            data = make_table(3)
+            window.FindElement('-TABLE-').Update(values=data)
+            window['-removeInput-'].update('')
 
     if event == "-removeDependency-":
-        if (values[18] != ""):
-            remove_depedency(values[18])
-            window[18].update("")
-
-
-    #if event == '-TABLE-':
-    #    print("Table clicked")
-    #    if event == '-removeConfig-':
-    #        print("We did it")
+        if (values['-toolData1-'] != ""):
+            remove_depedency(values['-toolData1-'])
+            window['-toolData1-'].update("")
