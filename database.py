@@ -86,16 +86,19 @@ connection = pymongo.MongoClient('localhost', 27017)
 database = connection['mydb_01']
 
 #create collection, but still no info, need to add something to the collection
-collection = database['mycol_01']
+collection = database['Run List']
 
 #Creating actual data
-data = {"Scan": "1____", "Name of Scan": "number _____", "Execution Number": "3142____________", "Start Time": "10:20_____", "End Time": "11:40___",
-        "Scanned IPs": "20_________", "Successful Execution/Failure": "25__________________________"}
+data = {"Scan": "2", "Name of Scan": "Saturday", "Execution Number": "3143", "Start Time": "9:10", "End Time": "3:40",
+        "Scanned IPs": "40", "Successful Execution/Failure": "20"}
+
+#data = {"Name of Run": "Third", "Description of Run": "Completed", "Result with Timestamp": "Success 1:30", "Control": "None"}
 
 #adding data to collection
 #Every time you run it it will create the data, even if it is the same information
 collection.insert_one(data)
 
+'''''
 #adding data and defining the ID, it cannot be repeated
 #data = {"_id": "user1", "Name": "El sebas"}
 #collection.insert_one(data)
@@ -121,3 +124,4 @@ def get_info_from_database(connection, database, collection):
         print(element.get("Scan"))
 
 connection.close()
+'''''

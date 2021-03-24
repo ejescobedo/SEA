@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import PySimpleGUI as sg
+import os
 import random
 import string
 
@@ -37,7 +38,10 @@ def get_multiple_data(collection):
 connection = pymongo.MongoClient('localhost', 27017)
 database = connection['mydb_01']
 collection = database['Tool List']
-information = get_multiple_data(collection)
+collectionScan = database['Scan List']
+collectionRun = database['Run List']
+
+#information = get_multiple_data(collection)
 
 
 #adding data to collection
@@ -48,51 +52,92 @@ sg.theme('LightGrey1')
 
 data = []
 headingsTool = ['Name of Tool', 'Description of Tool']
+headingsScan = ['Scan', 'Name of Scan', 'Execution Number','Start Time', 'End Time', 'Scanned IPs', 'Sucessful Execution/Failure', 'Control']
+headingsRun = ['Name of Run', 'Description of Run', 'Result with Timestemp', 'Control']
 
-def make_table(num_cols):
+headingsTool2 = ['dumb', 'yes']
+
+def makeToolConfigurationTable(num_cols):
     data = []
     i = 0
+    information = get_multiple_data(collection)
     data = [[j for j in range(num_cols)] for i in range(len(information))]
     for element in information:
         data[i] = [element.get("Name of Tool"), element.get("Description of Tool")]
         i += 1
     return data
 
-# ------ Make the Table Data ------
-data = make_table(num_cols=3)
+def makeScanTable():
+    num_cols = 9
+    data = []
+    i = 0
+    information = get_multiple_data(collectionScan)
+    data = [[j for j in range(num_cols)] for i in range(len(information))]
+    for element in information:
+        data[i] = [element.get("Scan"), element.get("Name of Scan"), element.get("Execution Number"),
+                   element.get("Start Time"), element.get("End Time"), element.get("Scanned IPs"),
+                   element.get("Sucessful Execution/Failure"), element.get("Control")]
+        i += 1
+    return data
 
+def makeRunTable():
+    num_cols = 5
+    data = []
+    i = 0
+    information = get_multiple_data(collectionRun)
+    data = [[j for j in range(num_cols)] for i in range(len(information))]
+    for element in information:
+        data[i] = [element.get("Name of Run"), element.get("Description of Run"), element.get("Result with Timestamp"),
+                   element.get("Control")]
+        i += 1
+    return data
+
+# ------ Make the Table Data ------
+dataToolConfiguration = makeToolConfigurationTable(num_cols=3)
+dataScan = makeScanTable()
+dataRun = makeRunTable()
 
 toolCol = [
-        [sg.Table(values=data[:][:], headings=headingsTool, max_col_width=25,
+        [sg.Table(values=dataToolConfiguration[:][:], headings=headingsTool, max_col_width=500,
                                 # background_color='light blue',
-                                auto_size_columns=True,
+                                auto_size_columns=False,
+                                col_widths = 90,
+                                def_col_width = 90,
                                 display_row_numbers=True,
-                                justification='right',
-                                num_rows=20,
-                                alternating_row_color='lightgrey',
+                                justification='left',
+                                num_rows=10,
+                                alternating_row_color='#ededed',
                                 key='-TABLE-',
-                                row_height=35, enable_events= True,
+                                row_height=25, enable_events= True,
                                 tooltip='This is a table')]]
 
-specCol = [
-        #[sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
-        [sg.Text('Tool Name', size=(20,1)), sg.InputText('')],
-        [sg.Text('Tool Description', size=(20,1)), sg.InputText('')],
-        [sg.Text('Tool Path', size=(20,1)), sg.InputText(''), sg.FileBrowse('Browse', key= '-toolPathBrowse-')],
-        [sg.Text('Option and Argument', size=(20,1)), sg.InputText('')],
-        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText(''), sg.Button('Add')],
-        [sg.Text('OR',font=('None 16'), size=(20,1))],
-        [sg.Text('Tool Specification File', pad=((5,5),(20,5)),size=(20,1)), sg.InputText(''), sg.FileBrowse('Browse', key= '-toolSpecificationFileBrowse')]
-        ]
 toolListCol = [
             #Run Table
             #[sg.Text('Tool List', font=('none 16'))],
-            [sg.Column(toolCol, scrollable=True)]]
+            [sg.Column(toolCol, scrollable=True)],
+            [sg.Text('Name of Tool', key='-toolConfigName-', size=(10,1)), sg.InputText('', key='-removeInput-'),
+             sg.Button("Remove Configuration", button_color=('white', 'red'), key='-removeConfig-'),
+             sg.Button("Load Configuration", button_color=('white', 'blue'), key='-loadConfig-')]
+            ]
+
+specCol = [
+        #[sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
+        [sg.Text('Tool Name', size=(20,1)), sg.InputText('', key='-spec1-')],
+        [sg.Text('Tool Description', size=(20,1)), sg.InputText('', key='-spec2-')],
+        [sg.Text('Tool Path', size=(20,1)), sg.InputText('', key='-spec3-'), sg.FileBrowse('Browse', key= '-toolPathBrowse-')],
+        [sg.Text('Option and Argument', size=(20,1)), sg.InputText('', key='-spec4-')],
+        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText('',key='-spec5-')],
+        [sg.Text('OR',font=('None 16'), size=(20,1))],
+        [sg.Text('Tool Specification File', pad=((5,5),(20,5)),size=(20,1)), sg.InputText('', key= '-toolSpecificationFile-'), sg.FileBrowse('Browse', key= '-toolSpecificationFileBrowse')],
+         [sg.Button('Add', key='-addSpec-'), sg.Button('Update Configuration', key='-updateConfig-')]
+        ]
+
+
 toolDepCol = [
             #[sg.Text('Tool Dependency', font=('none 16'),size=(20,1))],
-            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText('')],
-            [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('')],
-            [sg.Button('Add', key= '-addConfig-'), sg.Button('Remove', key='-removeDependency-')]
+            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], key='-toolData1-',size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], key='-toolData2-',size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText('',key='-toolData3-')],
+            [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('', key='-toolData4-')],
+            [sg.Button('Add', key= '-addConfig-'), sg.Button('Remove', button_color=('white', 'red'),key='-removeDependency-')]
             ]
 
 #run View
@@ -105,18 +150,18 @@ for i in range(15):
 
 
 scanCol = [
-        #[sg.Text('Scan List', font=('none 16'),size=(20,1))],
-        [sg.Text('Scan', text_color= 'black', background_color= 'lightgrey'), sg.Text('Name of Scan ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Execution Number ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Start Time ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('End Time ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Scanned IPs', text_color= 'black', background_color= 'lightgrey'), sg.Text('Sucessful Execution/Failure', text_color= 'black', background_color= 'lightgrey'), sg.Text('Control', text_color= 'black', background_color= 'lightgrey')],
-        contentScan[0],
-        contentScan[1],
-        contentScan[2],
-        contentScan[3],
-        contentScan[4],
-        contentScan[5],
-        contentScan[6],
-        contentScan[7],
-        contentScan[8],
-        contentScan[9]]
+    [sg.Table(values=dataScan[:][:], headings=headingsScan, max_col_width=500,
+              # background_color='light blue',
+              auto_size_columns=False,
+              col_widths=10,
+              def_col_width=10,
+              display_row_numbers=True,
+              justification='left',
+              num_rows=10,
+              alternating_row_color='#ededed',
+              key='-SCANTABLE-',
+              row_height=25, enable_events=True,
+              tooltip='This is a table')]]
 
 
 
@@ -124,28 +169,28 @@ for i in range(15):
     contentRun.append([sg.Text('Name of Run 0000'), sg.Text('Description of Run'), sg.Text('Result with Timestamp'), sg.Button('Start'), sg.Button('Pause'), sg.Button('Stop') ])
 
 runCol = [
-            #[sg.Text('Run List', font=('none 16'),size=(20,1))],
-            [sg.Text('Name of Run ▲ ▼', text_color= 'black', background_color= 'lightgrey'), sg.Text('Description of Run', text_color= 'black', background_color= 'lightgrey'), sg.Text('Result with Timestamp', text_color= 'black', background_color= 'lightgrey'), sg.Text('Control', text_color= 'black', background_color= 'lightgrey')],
-            contentRun[0],
-            contentRun[1],
-            contentRun[2],
-            contentRun[3],
-            contentRun[4],
-            contentRun[5],
-            contentRun[6],
-            contentRun[7],
-            contentRun[8],
-            contentRun[9]]
+    [sg.Table(values=dataRun[:][:], headings=headingsRun, max_col_width=500,
+              # background_color='light blue',
+              auto_size_columns=False,
+              col_widths=15,
+              def_col_width=15,
+              display_row_numbers=True,
+              justification='left',
+              num_rows=10,
+              alternating_row_color='#ededed',
+              key='-RUNTABLE-',
+              row_height=25, enable_events=True,
+              tooltip='This is a table')]]
 runConfigCol = [
         #[sg.Text('Configuration of the Selected Run',font=('none 16'),size=(30,1))],
-        [sg.Text('Run Name', size=(20,1)), sg.InputText('')],
-        [sg.Text('Run Description', size=(20,1)), sg.InputText('')],
-        [sg.Text('Whitelisted IP Target', size=(20,1)), sg.InputText('')],
-        [sg.Text('Blacklisted IP Target', size=(20,1)), sg.InputText('')],
-        [sg.Text('Scan Type', size=(20,1)), sg.InputCombo(['Scan Type', 'filler'], size=(20, 1)),sg.Button('Add')],
+        [sg.Text('Run Name', size=(20,1)), sg.InputText('', key= '-runName-')],
+        [sg.Text('Run Description', size=(20,1)), sg.InputText('', key= '-runDescription-')],
+        [sg.Text('Whitelisted IP Target', size=(20,1)), sg.InputText('', key= '-whitelist-')],
+        [sg.Text('Blacklisted IP Target', size=(20,1)), sg.InputText('', key= '-blacklist-')],
+        [sg.Text('Scan Type', size=(20,1)), sg.InputCombo(['Scan Type', 'filler'], size=(20, 1), key= '-scanType-')],
         [sg.Text('OR',font=('None 16'))],
-        [sg.Text('Run Configuration File', size=(20,1)), sg.Button('Browse')],
-        [sg.Button('Save', pad=((5,5),(30,5)), button_color=('black','white')), sg.Button('Cancel',button_color=('white','black'), pad=((5,5),(30,5)))]
+        [sg.Text('Run Configuration File', size=(20,1)), sg.Button('Browse', key= '-runConfigurationFile-')],
+        [sg.Button('Save', pad=((5,5),(30,5)), key= '-saveRunConfiguration-', button_color=('black','white')), sg.Button('Cancel', key= '-cancelRunConfiguration-',button_color=('white','black'), pad=((5,5),(30,5)))]
         ]
 xmlCol = [
         #[sg.Text('XML Report', font=('none 16'),size=(20,1))],
@@ -157,8 +202,9 @@ xmlCol = [
         [sg.Button('Generate', pad=((5,5),(30,5)), button_color=('black','white')), sg.Button('Cancel', button_color=('white','black'), pad=((5,5),(30,5)))]
         ]
 
-tab1_layout =  [[sg.T('Output of Scan X',size=(220,20))]]
-tab2_layout =  [[sg.T('Output of Scan Y',size=(210,20))]]
+tab1_layout =  [[sg.T('Output of Scan X',size=(220,15))]]
+tab2_layout =  [[sg.T('Output of Scan Y',size=(210,15))]]
+
 
 
 outputTabCol = [
@@ -206,8 +252,9 @@ run_tab_layout =  [
                 #[sg.TabGroup([[sg.Tab('Scan X', tab1_layout), sg.Tab('Scan Y', tab2_layout)]])]
                 ]
 tool_tab_layout =  [
-                [sg.Column(toolListFrame),  sg.Column(specColFrame, vertical_alignment='top')],
-                [sg.Text('Name of Tool', key='-toolConfigName-', size=(10,1)), sg.InputText(''), sg.Button("Remove Configuration", key='-removeConfig-')],                          #####Added buttons here
+                [sg.Column(toolListFrame)],
+
+                [sg.Column(specColFrame, vertical_alignment='top')],
                 [sg.Column(toolDepColFrame)]]
 
 
@@ -229,40 +276,122 @@ while True:
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
-    if event == 'Add60':
-        print("Add clicked")
-        if ((values[11] != "") and (values[12] != "") and (values[13] != "")  and (values[14] != "") and values[15] != ""):
-            data = data = {"Name of Tool": values[11], "Description of Tool": values[12], "Path of Tool": values[13]
-                           , "Option and Argument of Tool": values[14], "Output Data Specification of Tool"
-                           : values[15]}
+    if event == '-addSpec-':
+        if ((values['-spec1-'] != "") and (values['-spec2-'] != "") and (values['-spec3-'] != "")  and (values['-spec4-'] != "") and values['-spec5-'] != ""):
+            data = data = {"Name of Tool": values['-spec1-'], "Description of Tool": values['-spec2-'], "Path of Tool": values['-spec3-']
+                           , "Option and Argument of Tool": values['-spec4-'], "Output Data Specification of Tool"
+                           : values['-spec5-']}
             collection.insert_one(data)
-            for i in range (11, 16):
-                window[i].update("")
+            data = makeToolConfigurationTable(3)
+            window.FindElement('-TABLE-').Update(values=data)
+
+            window['-spec1-'].update('')
+            window['-spec2-'].update('')
+            window['-spec3-'].update('')
+            window['-spec4-'].update('')
+            window['-spec5-'].update('')
+        elif values['-toolSpecificationFile-'] != "":
+            f = open(values['-toolSpecificationFile-'], "r")
+            print(f.read())
+            window['-toolSpecificationFile-'].update('')
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
+
     if event == "-addConfig-":
-        if ((values[18] != "") and (values[19] != "") and (values[20] != "") and (values[21] != "")):
+        if ((values['-toolData1-'] != "") and (values['-toolData2-'] != "") and (values['-toolData3-'] != "") and (values['-toolData4-'] != "")):
             collection = database['Tool Dependency']
-            data = data = {"Dependent Data": values[18], "Operator": values[19],
-                           "Value": values[20]
-                , "Dependency Expression": values[21]}
+            data = data = {"Dependent Data": values['-toolData1-'], "Operator": values['-toolData2-'],
+                           "Value": values['-toolData3-']
+                , "Dependency Expression": values['-toolData4-']}
             collection.insert_one(data)
-            for i in range (17, 22):
-                window[i].update("")
+            window['-toolData1-'].update('')
+            window['-toolData2-'].update('')
+            window['-toolData3-'].update('')
+            window['-toolData4-'].update('')
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
     if event == "-removeConfig-":
-        if (values[17] != ""):
-            remove_tool_list(values[17])
-            window[17].update("")
+        if (values["-removeInput-"] != ""):
+            confirm = sg.popup_get_text(message="To confirm removal of configuration type 'Remove', else, exit")
+            confirm = confirm.lower()
+            if confirm == "remove":
+                remove_tool_list(values["-removeInput-"])
+                data = makeToolConfigurationTable(3)
+                window.FindElement('-TABLE-').Update(values=data)
+                window['-removeInput-'].update('')
 
     if event == "-removeDependency-":
-        if (values[18] != ""):
-            remove_depedency(values[18])
-            window[18].update("")
+        confirm = sg.popup_get_text(message="To confirm removal of dependency type 'Remove', else, exit")
+        confirm = confirm.lower()
+        if confirm == "remove":
+            if (values['-toolData1-'] != ""):
+                remove_depedency(values['-toolData1-'])
+                window['-toolData1-'].update("")
+
+    if event == "-saveRunConfiguration-":
+        if ((values['-runName-'] != "") and (values['-runDescription-'] != "") and (values['-whitelist-'] != "") and (values['-blacklist-'] != "") and (values['-scanType-'] != "")):
+            collection = database['Run List']
+            data = data = {"Dependent Data": values['-toolData1-'], "Operator": values['-toolData2-'],
+                           "Value": values['-toolData3-']
+                , "Dependency Expression": values['-toolData4-']}
+            data = {"Name of Run": values['-runName-'], "Description of Run": values['-runDescription-'],
+                    "Whitelisted IP Target": values['-whitelist-'], "Blacklisted IP Target": values['-blacklist-'],
+                    "Scan Type": values['-scanType-'], "Control": "None", "Result with Timestamp": "TBI"}
+            collection.insert_one(data)
+            window['-runName-'].update('')
+            window['-runDescription-'].update('')
+            window['-whitelist-'].update('')
+            window['-blacklist-'].update('')
+            window['-scanType-'].update('')
+
+            data = makeRunTable()
+            window.FindElement('-RUNTABLE-').Update(values=data)
+
+        else:
+            sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
+    if event  == "-cancelRunConfiguration-":
+        window['-runName-'].update('')
+        window['-runDescription-'].update('')
+        window['-whitelist-'].update('')
+        window['-blacklist-'].update('')
+        window['-scanType-'].update('')
+
+    if event == "-loadConfig-":
+        target = []
+        if (values["-removeInput-"] != ""):
+            collection = database['Tool List']
+            information = get_multiple_data(collection)
+            for element in information:
+                if element.get("Name of Tool") == values["-removeInput-"]:
+                    target = element
+                    window['-spec1-'].update(element.get("Name of Tool"))
+                    window['-spec2-'].update(element.get("Description of Tool"))
+                    window['-spec3-'].update(element.get("Path of Tool"))
+                    window['-spec4-'].update(element.get("Option and Argument of Tool"))
+                    window['-spec5-'].update(element.get("Output Data Specification of Tool"))
+                    window['-removeInput-'].update('')
+        print(target)
+    if event == "-updateConfig-":
+        confirm = sg.popup_get_text(message="To confirm update of configuration type 'confirm', else, exit")
+        confirm.lower()
+        if confirm == "confirm":
+            remove_tool_list(values["-spec1-"])
+            if ((values['-spec1-'] != "") and (values['-spec2-'] != "") and (values['-spec3-'] != "") and (
+                    values['-spec4-'] != "") and values['-spec5-'] != ""):
+                data = data = {"Name of Tool": values['-spec1-'], "Description of Tool": values['-spec2-'],
+                                "Path of Tool": values['-spec3-']
+                    , "Option and Argument of Tool": values['-spec4-'], "Output Data Specification of Tool"
+                    : values['-spec5-']}
+                collection.insert_one(data)
+                data = makeToolConfigurationTable(3)
+                window.FindElement('-TABLE-').Update(values=data)
+
+                window['-spec1-'].update('')
+                window['-spec2-'].update('')
+                window['-spec3-'].update('')
+                window['-spec4-'].update('')
+                window['-spec5-'].update('')
+            else:
+                sg.popup(title="Missing input", custom_text='Please check the missing parameters')
 
 
-    #if event == '-TABLE-':
-    #    print("Table clicked")
-    #    if event == '-removeConfig-':
-    #        print("We did it")
