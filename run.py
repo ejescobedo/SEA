@@ -189,7 +189,8 @@ runConfigCol = [
         [sg.Text('Blacklisted IP Target', size=(20,1)), sg.InputText('', key= '-blacklist-')],
         [sg.Text('Scan Type', size=(20,1)), sg.InputCombo(['Scan Type', 'filler'], size=(20, 1), key= '-scanType-')],
         [sg.Text('OR',font=('None 16'))],
-        [sg.Text('Run Configuration File', size=(20,1)), sg.Button('Browse', key= '-runConfigurationFile-')],
+        [sg.Text('Run Configuration File', pad=((5,5),(18,5)),size=(17,1)), sg.InputText('', key= '-runConfigurationFile-'),
+         sg.FileBrowse('Browse', key= '-runConfigurationFileBrowse')],    ##Added!
         [sg.Button('Save', pad=((5,5),(30,5)), key= '-saveRunConfiguration-', button_color=('black','white')), sg.Button('Cancel', key= '-cancelRunConfiguration-',button_color=('white','black'), pad=((5,5),(30,5)))]
         ]
 xmlCol = [
@@ -310,6 +311,8 @@ while True:
             window['-toolData4-'].update('')
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
+
+
     if event == "-removeConfig-":
         if (values["-removeInput-"] != ""):
             confirm = sg.popup_get_text(message="To confirm removal of configuration type 'Remove', else, exit")
@@ -346,6 +349,11 @@ while True:
 
             data = makeRunTable()
             window.FindElement('-RUNTABLE-').Update(values=data)
+
+        elif values['-runConfigurationFile-'] != "":
+            f = open(values['-runConfigurationFile-'], "r")
+            print(f.read())
+            window['-runConfigurationFile-'].update('')
 
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
