@@ -205,6 +205,17 @@ xmlCol = [
         [sg.Button('Generate', pad=((5,5),(30,5)), button_color=('black','white')), sg.Button('Cancel', button_color=('white','black'), pad=((5,5),(30,5)))]
         ]
 
+helpView = [
+        [sg.Text('Tool Dependency - How to Use')],
+        [sg.Text('The Tool List displays a list of the already configured underlying tools')],
+        [sg.Text('......')]
+        # Tool dependency help
+        # Run help
+
+        # Created by
+
+        ]
+
 tab1_layout =  [[sg.T('Output of Scan X',size=(220,15))]]
 tab2_layout =  [[sg.T('Output of Scan Y',size=(210,15))]]
 
@@ -241,20 +252,24 @@ outputFrame = [
 
 
 run_tab_layout =  [
-                [sg.Column(scanFrame, vertical_alignment=('Top')), sg.Column(runFrame)],
+                [sg.Column(scanFrame, vertical_alignment=('Top')), sg.Column(runFrame, vertical_alignment=('Top'))],
                 [sg.Column(xmlFrame, vertical_alignment=('Top')), sg.Column(runConfigFrame, vertical_alignment=('Top'))],
                 [sg.Column(outputFrame)]
                 ]
 
 tool_tab_layout =  [
-                [sg.Frame('Tool', toolListCol, title_location = 'nw',relief='ridge', font='none 16')],
+                [sg.Frame('Tool List', toolListCol, title_location = 'nw',relief='ridge', font='none 16')],
                 [sg.Column(specColFrame, vertical_alignment='top')],
                 [sg.Column(toolDepColFrame)]]
+
+help_tab_layout =  [
+                [sg.Frame('Help', helpView, title_location = 'nw',relief='ridge', font='none 16')],
+                ]
 
 
 #window layout
 layout = [
-        [sg.TabGroup([[sg.Tab('Run', run_tab_layout, font=('none 24')), sg.Tab('Tool', tool_tab_layout)]])]
+        [sg.TabGroup([[sg.Tab('Run', run_tab_layout, font=('none 24')), sg.Tab('Tool', tool_tab_layout), sg.Tab('Help', help_tab_layout)]])]
 
         ]
 
@@ -305,17 +320,6 @@ while True:
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
 
-    '''''
-    if event == "-removeConfig-":
-        if (values["-removeInput-"] != ""):
-            confirm = sg.popup_get_text(message="To confirm removal of configuration type 'Remove', else, exit")
-            confirm = confirm.lower()
-            if confirm == "remove":
-                remove_tool_list(values["-removeInput-"])
-                data = makeToolConfigurationTable(3)
-                window.FindElement('-TABLE-').Update(values=data)
-                window['-removeInput-'].update('')
-    '''''
 
     if event == "-removeConfig-":
         tableElement = window['-TABLE-'].get()
@@ -325,20 +329,21 @@ while True:
         rowClicked = tableElement[tableRow]
         print(rowClicked[0])
 
-        confirm = sg.popup_get_text(message="To confirm removal of configuration type 'Remove', else, exit")
-        confirm = confirm.lower()
+        confirm = sg.popup_yes_no('Are you sure you want to remove the selected configuration?', title='Remove')
+
         
-        if confirm == "remove":
+        if confirm == "Yes":
+            print('ok')
             tool = rowClicked[0]
             remove_tool_list(rowClicked[0])
             data = makeToolConfigurationTable(3)
             window.FindElement('-TABLE-').Update(values=data)
-            #window['-removeInput-'].update('')
+    
 
     if event == "-removeDependency-":
-        confirm = sg.popup_get_text(message="To confirm removal of dependency type 'Remove', else, exit")
-        confirm = confirm.lower()
-        if confirm == "remove":
+        confirm = sg.popup_yes_no('Are you sure you want to remove the selected dependency?', title='Remove')
+
+        if confirm == "Yes":
             if (values['-toolData1-'] != ""):
                 remove_depedency(values['-toolData1-'])
                 window['-toolData1-'].update("")
@@ -397,26 +402,12 @@ while True:
                 window['-spec3-'].update(element.get("Path of Tool"))
                 window['-spec4-'].update(element.get("Option and Argument of Tool"))
                 window['-spec5-'].update(element.get("Output Data Specification of Tool"))
-            #window['-removeInput-'].update('')
-
-
-        # if (values["-removeInput-"] != ""):
-        #     collection = database['Tool List']
-        #     information = get_multiple_data(collection)
-        #     for element in information:
-        #         if element.get("Name of Tool") == values["-removeInput-"]:
-        #             target = element
-        #             window['-spec1-'].update(element.get("Name of Tool"))
-        #             window['-spec2-'].update(element.get("Description of Tool"))
-        #             window['-spec3-'].update(element.get("Path of Tool"))
-        #             window['-spec4-'].update(element.get("Option and Argument of Tool"))
-        #             window['-spec5-'].update(element.get("Output Data Specification of Tool"))
-        #             window['-removeInput-'].update('')
-        # print(target)
+    
     if event == "-updateConfig-":
-        confirm = sg.popup_get_text(message="To confirm update of configuration type 'confirm', else, exit")
-        confirm.lower()
-        if confirm == "confirm":
+        
+        confirm = sg.popup_yes_no('Are you sure you want to update the selected configuration?', title='Update')
+        
+        if confirm == "Yes":
             remove_tool_list(values["-spec1-"])
             if ((values['-spec1-'] != "") and (values['-spec2-'] != "") and (values['-spec3-'] != "") and (
                     values['-spec4-'] != "") and values['-spec5-'] != ""):
@@ -426,8 +417,9 @@ while True:
                     : values['-spec5-']}
                 collection.insert_one(data)
                 data = makeToolConfigurationTable(3)
+                
                 window.FindElement('-TABLE-').Update(values=data)
-
+                
                 window['-spec1-'].update('')
                 window['-spec2-'].update('')
                 window['-spec3-'].update('')
