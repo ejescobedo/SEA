@@ -9,6 +9,7 @@ import pymongo
 from bson import ObjectId
 
 # Custom theme
+
 sea = {'BACKGROUND': '#F0F0F0',
                 'TEXT': 'black',
                 'INPUT': '#FFFFFF',
@@ -114,6 +115,9 @@ toolListCol = [
                                 display_row_numbers=True,
                                 justification='left',
                                 num_rows=10,
+                                header_text_color = 'black',
+                                header_background_color = 'darkgrey',
+                                text_color = 'black',
                                 alternating_row_color='#ededed',
                                 key='-TABLE-',
                                 row_height=25, enable_events= True,
@@ -157,13 +161,15 @@ scanCol = [
               auto_size_columns=False,
               def_col_width=10,
               display_row_numbers=True,
+              header_text_color = 'black',
+              header_background_color = 'darkgrey',
               justification='left',
               num_rows=10,
               alternating_row_color='#ededed',
               key='-SCANTABLE-',
               row_height=25, enable_events=True,
               tooltip='This is a table')],
-    [sg.Button('Start'), sg.Button('Pause', button_color=('white', '#E5B302')), sg.Button('Stop', button_color=('white', 'red'))]
+    [sg.Button('Start'), sg.Button('Pause', button_color=('white', '#E5B302')), sg.Button('Stop', button_color=('white', '#65344B'))]
     ]
 
 
@@ -177,6 +183,8 @@ runCol = [
               auto_size_columns=False,
               def_col_width=25,
               display_row_numbers=True,
+              header_text_color = 'black',
+              header_background_color = 'darkgrey',
               justification='left',
               num_rows=10,
               alternating_row_color='#ededed',
@@ -206,8 +214,18 @@ xmlCol = [
         ]
 
 helpView = [
-        [sg.Text('Tool Dependency - How to Use')],
-        [sg.Text('The Tool List displays a list of the already configured underlying tools')],
+        [sg.Text('Scan List - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('Run List - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('XML Report - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('Configuration of the Selected Run - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('Output - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('Tool List - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('The Tool List displays a list of the already configured underlying tools.')],
+        [sg.Text('You have the option to select a tool from the list and either select Remove to remove the configuration or select Load Configuration to auto populate the tools configuration into the tool specification area below.')],
+        [sg.Text('Tool Specificitation - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('The Tool Specification allows you to add or update a custom tool configuration to the tool list.')],
+        [sg.Text('Tool Dependency - How to Use', font='None 14', pad=((5,0),(15,0)))],
+        [sg.Text('The Tool Dependency allows you to add or remove the dependencies between different tools.')],
         [sg.Text('......')]
         # Tool dependency help
         # Run help
@@ -216,8 +234,8 @@ helpView = [
 
         ]
 
-tab1_layout =  [[sg.T('Output of Scan X',size=(220,15))]]
-tab2_layout =  [[sg.T('Output of Scan Y',size=(210,15))]]
+tab1_layout =  [[sg.T('Output of Scan X',size=(220,10))]]
+tab2_layout =  [[sg.T('Output of Scan Y',size=(210,10))]]
 
 
 
@@ -274,7 +292,7 @@ layout = [
         ]
 
 #create window
-window = sg.Window('SEA Tool Version 1.0 - Run', layout)
+window = sg.Window('SEA Tool Version 1.0 - Home', layout)
 
 #event loop
 
@@ -285,6 +303,7 @@ while True:
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
+    
     if event == '-addSpec-':
         if ((values['-spec1-'] != "") and (values['-spec2-'] != "") and (values['-spec3-'] != "")  and (values['-spec4-'] != "") and values['-spec5-'] != ""):
             data = data = {"Name of Tool": values['-spec1-'], "Description of Tool": values['-spec2-'], "Path of Tool": values['-spec3-']
@@ -374,6 +393,7 @@ while True:
 
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
+    
     if event  == "-cancelRunConfiguration-":
         window['-runName-'].update('')
         window['-runDescription-'].update('')
@@ -419,7 +439,7 @@ while True:
                 data = makeToolConfigurationTable(3)
                 
                 window.FindElement('-TABLE-').Update(values=data)
-                
+
                 window['-spec1-'].update('')
                 window['-spec2-'].update('')
                 window['-spec3-'].update('')
