@@ -312,7 +312,7 @@ while True:
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
 
-
+    '''''
     if event == "-removeConfig-":
         if (values["-removeInput-"] != ""):
             confirm = sg.popup_get_text(message="To confirm removal of configuration type 'Remove', else, exit")
@@ -322,6 +322,24 @@ while True:
                 data = makeToolConfigurationTable(3)
                 window.FindElement('-TABLE-').Update(values=data)
                 window['-removeInput-'].update('')
+    '''''
+
+    if event == "-removeConfig-":
+        tableElement = window['-TABLE-'].get()
+
+        tableRow = values['-TABLE-']
+        tableRow = tableRow[0]
+        rowClicked = tableElement[tableRow]
+        print(rowClicked[0])
+
+        confirm = sg.popup_get_text(message="To confirm removal of configuration type 'Remove', else, exit")
+        confirm = confirm.lower()
+        if confirm == "remove":
+            tool = rowClicked[0]
+            remove_tool_list(rowClicked[0])
+            data = makeToolConfigurationTable(3)
+            window.FindElement('-TABLE-').Update(values=data)
+            window['-removeInput-'].update('')
 
     if event == "-removeDependency-":
         confirm = sg.popup_get_text(message="To confirm removal of dependency type 'Remove', else, exit")
