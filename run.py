@@ -3,14 +3,39 @@ import PySimpleGUI as sg
 import os
 import random
 import string
-
-
 import pymongo
 from bson import ObjectId
 
 # Custom theme
+table_text_color = 'white'
+table_background_color = '#282A2B'
+table_alternate_row_color = '#1D1F21'
+header_color = '#2A2C2E'
+header_t_color = 'white'
+titles = '#51A0D5'
+titles2 = '#51A0D5'
+relief = 'ridge'
+title_location = 'nw'
+border_width = 0
+tab_border_width = 0
+selected_row_colors = ('white','#51A0D5')
 
-sea = {'BACKGROUND': '#F0F0F0',
+buttondefault = ('white', '#2A2C2E')
+yellowbutton = ('white', '#E5B302')
+buttondefault2 = ('white', '#51A0D5')
+
+dark_theme = {'BACKGROUND': '#282A2B',
+                'TEXT': 'white',
+                'INPUT': '#656565',
+                'TEXT_INPUT': 'white',
+                'SCROLL': 'red',
+                'BUTTON': ('white', '#2A2C2E'),
+                'PROGRESS': ('white', '#333945'),
+                'BORDER': 1,
+                'SLIDER_DEPTH': 0,
+                'PROGRESS_DEPTH': 0}
+
+light_theme = {'BACKGROUND': '#323232',
                 'TEXT': 'black',
                 'INPUT': '#FFFFFF',
                 'TEXT_INPUT': 'black',
@@ -23,10 +48,11 @@ sea = {'BACKGROUND': '#F0F0F0',
 
 
 # Add theme to dict
-sg.theme_add_new('SEA', sea)
+#sg.theme_add_new('Light', light_theme)
+sg.theme_add_new('Dark', dark_theme)
 
 #theme
-sg.theme('SEA')
+sg.theme('Dark')
 
 def remove_Tool(name):
     document = collection.delete_one({'Name of Tool': name})
@@ -58,7 +84,7 @@ collection = database['Tool List']
 collectionScan = database['Scan List']
 collectionRun = database['Run List']
 
-#information = get_multiple_data(collection)
+
 
 data = []
 headingsTool = ['Name of Tool', 'Description of Tool']
@@ -109,41 +135,43 @@ dataRun = makeRunTable()
 
 toolListCol = [
         [sg.Table(values=dataToolConfiguration[:][:], headings=headingsTool, max_col_width=500,
-                                background_color='white',
+                                background_color=table_background_color,
                                 auto_size_columns=False,
                                 def_col_width = 90,
                                 display_row_numbers=True,
                                 justification='left',
-                                num_rows=10,
-                                header_text_color = 'black',
-                                header_background_color = 'darkgrey',
-                                text_color = 'black',
-                                alternating_row_color='#ededed',
+                                num_rows=7,
+                                pad=((0,0),(15,10)),
+                                header_text_color = header_t_color,
+                                selected_row_colors = selected_row_colors,
+                                header_background_color = header_color,
+                                text_color = table_text_color,
+                                alternating_row_color=table_alternate_row_color,
                                 key='-TABLE-',
                                 row_height=25, enable_events= True,
                                 tooltip='This is a table')],
-        [sg.Button("Remove Configuration", button_color=('white', '#65344B'), key='-removeConfig-'), sg.Button("Load Configuration", key='-loadConfig-')]
+        [sg.Button("Remove Configuration", button_color=(buttondefault), key='-removeConfig-'), sg.Button("Load Configuration", button_color=(buttondefault), key='-loadConfig-')]
         ]
 
 
 specCol = [
         #[sg.Text('Tool Specification', font=('none 16'),size=(20,1))],
-        [sg.Text('Tool Name', size=(20,1)), sg.InputText('', key='-spec1-')],
-        [sg.Text('Tool Description', size=(20,1)), sg.InputText('', key='-spec2-')],
-        [sg.Text('Tool Path', size=(20,1)), sg.InputText('', key='-spec3-'), sg.FileBrowse('Browse', key= '-toolPathBrowse-')],
-        [sg.Text('Option and Argument', size=(20,1)), sg.InputText('', key='-spec4-')],
-        [sg.Text('Output Data Specification', size=(20,1)), sg.InputText('',key='-spec5-')],
+        [sg.Text('Tool Name', font=('None 12'),pad=((5,5),(30,5)), size=(20,1)), sg.InputText('', font=('None 12'),pad=((5,5),(30,5)), key='-spec1-')],
+        [sg.Text('Tool Description', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key='-spec2-')],
+        [sg.Text('Tool Path', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key='-spec3-'), sg.FileBrowse('Browse', button_color=(buttondefault), key= '-toolPathBrowse-')],
+        [sg.Text('Option and Argument', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key='-spec4-')],
+        [sg.Text('Output Data Specification', font=('None 12'),size=(20,1)), sg.InputText('',font=('None 12'),key='-spec5-')],
         [sg.Text('OR',font=('None 16'), size=(20,1))],
-        [sg.Text('Tool Specification File', pad=((5,5),(20,5)),size=(20,1)), sg.InputText('', key= '-toolSpecificationFile-'), sg.FileBrowse('Browse', key= '-toolSpecificationFileBrowse')],
-         [sg.Button('Add', key='-addSpec-'), sg.Button('Update Configuration', key='-updateConfig-')]
+        [sg.Text('Tool Specification File', font=('None 12'),pad=((5,5),(20,5)),size=(20,1)), sg.InputText('', font=('None 12'),key= '-toolSpecificationFile-'), sg.FileBrowse('Browse', key= '-toolSpecificationFileBrowse')],
+        [sg.Button('Add', button_color=(buttondefault), key='-addSpec-'), sg.Button('Update Configuration', button_color=(buttondefault),key='-updateConfig-')]
         ]
 
 
 toolDepCol = [
             #[sg.Text('Tool Dependency', font=('none 16'),size=(20,1))],
-            [sg.Text('Dependent Data', size=(15,1)), sg.InputCombo(['X', 'Y'], key='-toolData1-',size=(15, 1)), sg.Text('Operator', size=(0,0)), sg.InputCombo(['X', 'Y'], key='-toolData2-',size=(15, 1)), sg.Text('Value', size=(0,0)), sg.InputText('',key='-toolData3-')],
-            [sg.Text('Dependency Expression', size=(20,1)), sg.InputText('', key='-toolData4-')],
-            [sg.Button('Add', key= '-addConfig-'), sg.Button('Remove', button_color=('white', '#65344B'),key='-removeDependency-')]
+            [sg.Text('Dependent Data', font=('None 12'),pad=((5,5),(30,5)),size=(15,1)), sg.InputCombo(['X', 'Y'], font=('None 12'),pad=((5,5),(30,5)),key='-toolData1-',size=(15, 1)), sg.Text('Operator', font=('None 12'),pad=((5,5),(30,5)),size=(0,0)), sg.InputCombo(['X', 'Y'], font=('None 12'),pad=((5,5),(30,5)),key='-toolData2-',size=(15, 1)), sg.Text('Value', font=('None 12'),pad=((5,5),(30,5)), size=(0,0)), sg.InputText('',font=('None 12'),pad=((5,5),(30,5)),key='-toolData3-')],
+            [sg.Text('Dependency Expression', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key='-toolData4-')],
+            [sg.Button('Add', button_color=(buttondefault),key= '-addConfig-'), sg.Button('Remove', button_color=(buttondefault),key='-removeDependency-')]
             ]
 
 #run View
@@ -157,19 +185,22 @@ for i in range(15):
 
 scanCol = [
     [sg.Table(values=dataScan[:][:], headings=headingsScan, max_col_width=500,
-              background_color='white',
+              background_color=table_background_color,
               auto_size_columns=False,
               def_col_width=10,
+              pad=((0,0),(15,10)),
               display_row_numbers=True,
-              header_text_color = 'black',
-              header_background_color = 'darkgrey',
+              header_text_color = header_t_color,
+              header_background_color = header_color,
               justification='left',
-              num_rows=10,
-              alternating_row_color='#ededed',
+              selected_row_colors = selected_row_colors,
+              num_rows=7,
+              text_color = table_text_color,
+              alternating_row_color=table_alternate_row_color,
               key='-SCANTABLE-',
               row_height=25, enable_events=True,
               tooltip='This is a table')],
-    [sg.Button('Start'), sg.Button('Pause', button_color=('white', '#E5B302')), sg.Button('Stop', button_color=('white', '#65344B'))]
+    [sg.Button('Start', button_color=(buttondefault)), sg.Button('Pause', button_color=(buttondefault)), sg.Button('Stop', button_color=(buttondefault))]
     ]
 
 
@@ -179,38 +210,41 @@ for i in range(15):
 
 runCol = [
     [sg.Table(values=dataRun[:][:], headings=headingsRun, max_col_width=500,
-              background_color='white',
+              background_color= table_background_color,
               auto_size_columns=False,
               def_col_width=25,
               display_row_numbers=True,
-              header_text_color = 'black',
-              header_background_color = 'darkgrey',
+              pad=((0,0),(15,0)),
+              header_text_color = header_t_color,
+              header_background_color = header_color,
+              text_color = table_text_color,
               justification='left',
-              num_rows=10,
-              alternating_row_color='#ededed',
+              selected_row_colors = selected_row_colors,
+              num_rows=7,
+              alternating_row_color=table_alternate_row_color,
               key='-RUNTABLE-',
               row_height=25, enable_events=True,
               tooltip='This is a table')]]
 runConfigCol = [
         #[sg.Text('Configuration of the Selected Run',font=('none 16'),size=(30,1))],
-        [sg.Text('Run Name', size=(20,1)), sg.InputText('', key= '-runName-')],
-        [sg.Text('Run Description', size=(20,1)), sg.InputText('', key= '-runDescription-')],
-        [sg.Text('Whitelisted IP Target', size=(20,1)), sg.InputText('', key= '-whitelist-')],
-        [sg.Text('Blacklisted IP Target', size=(20,1)), sg.InputText('', key= '-blacklist-')],
-        [sg.Text('Scan Type', size=(20,1)), sg.InputCombo(['Scan Type', 'filler'], size=(20, 1), key= '-scanType-')],
+        [sg.Text('Run Name', font=('None 12'),pad=((5,5),(30,3)), size=(20,1)), sg.InputText('',font=('None 12'), pad=((5,5),(30,3)),key= '-runName-')],
+        [sg.Text('Run Description', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key= '-runDescription-')],
+        [sg.Text('Whitelisted IP Target', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key= '-whitelist-')],
+        [sg.Text('Blacklisted IP Target', font=('None 12'),size=(20,1)), sg.InputText('', font=('None 12'),key= '-blacklist-')],
+        [sg.Text('Scan Type', font=('None 12'),size=(20,1)), sg.InputCombo(['Scan Type', 'filler'], font=('None 12'),size=(20, 1), key= '-scanType-')],
         [sg.Text('OR',font=('None 16'))],
-        [sg.Text('Run Configuration File', pad=((5,5),(18,5)),size=(17,1)), sg.InputText('', key= '-runConfigurationFile-'),
-         sg.FileBrowse('Browse', key= '-runConfigurationFileBrowse')],    ##Added!
-        [sg.Button('Save', pad=((5,5),(30,5)), key= '-saveRunConfiguration-', button_color=('black','white')), sg.Button('Cancel', key= '-cancelRunConfiguration-',button_color=('white','black'), pad=((5,5),(30,5)))]
+        [sg.Text('Run Configuration File', font=('None 12'),pad=((5,5),(0,0)),size=(20,1)), sg.InputText('', font=('None 12'),key= '-runConfigurationFile-'),
+         sg.FileBrowse('Browse',key= '-runConfigurationFileBrowse')],    ##Added!
+        [sg.Button('Save', pad=((5,5),(10,0)), key= '-saveRunConfiguration-', button_color=(buttondefault)), sg.Button('Cancel', key= '-cancelRunConfiguration-',button_color=(buttondefault), pad=((5,5),(10,0)))]
         ]
 xmlCol = [
         #[sg.Text('XML Report', font=('none 16'),size=(20,1))],
-        [sg.Text('Report Name', size=(15,1)), sg.InputText('')],
-        [sg.Text('Report Description', size=(15,1)), sg.InputText('')],
-        [sg.Text('Run', size=(15,1)), sg.InputCombo(['X', 'Y'], size=(15, 1)),sg.Button('Add')],
+        [sg.Text('Report Name', font=('None 12'),pad=((5,5),(30,5)),size=(15,1)), sg.InputText('',font=('None 12'),size=(15,1),pad=((5,5),(30,5)))],
+        [sg.Text('Report Description', font=('None 12'),size=(15,1)), sg.InputText('',font=('None 12'),size=(15,1))],
+        [sg.Text('Run', font=('None 12'),size=(15,1)), sg.InputCombo(['X', 'Y'], font=('None 12'),size=(15, 1)),sg.Button('Add')],
         [sg.Text('OR', font=('None 16'), size=(15,1))],
-        [sg.Text('Run', size=(15,1)), sg.InputCombo(['Run X', 'Run Y'], size=(15, 1)),sg.Text('Scan'), sg.InputCombo(['Scan X', 'Scan Y'], size=(15, 1)),sg.Button('Remove', button_color=('white', '#65344B')), sg.Button('Add')],
-        [sg.Button('Generate', pad=((5,5),(30,5)), button_color=('black','white')), sg.Button('Cancel', button_color=('white','black'), pad=((5,5),(30,5)))]
+        [sg.Text('Run', font=('None 12'),size=(15,1)), sg.InputCombo(['Run X', 'Run Y'], font=('None 12'),size=(15, 1)),sg.Text('Scan',font=('None 12'),), sg.InputCombo(['Scan X', 'Scan Y'],font=('None 12'), size=(15, 1)),sg.Button('Remove', button_color=(buttondefault)), sg.Button('Add')],
+        [sg.Button('Generate',pad=((5,5),(30,5)), button_color=(buttondefault)), sg.Button('Cancel', button_color=(buttondefault), pad=((5,5),(30,5)))]
         ]
 
 helpView = [
@@ -226,7 +260,8 @@ helpView = [
         [sg.Text('The Tool Specification allows you to add or update a custom tool configuration to the tool list.')],
         [sg.Text('Tool Dependency - How to Use', font='None 14', pad=((5,0),(15,0)))],
         [sg.Text('The Tool Dependency allows you to add or remove the dependencies between different tools.')],
-        [sg.Text('......')]
+        [sg.Text('......')],
+        [sg.Button('Dark Mode')]
         # Tool dependency help
         # Run help
 
@@ -234,38 +269,38 @@ helpView = [
 
         ]
 
-tab1_layout =  [[sg.T('Output of Scan X',size=(220,10))]]
-tab2_layout =  [[sg.T('Output of Scan Y',size=(210,10))]]
+tab1_layout =  [[sg.T('Output of Scan X', size=(220,10))]]
+tab2_layout =  [[sg.T('Output of Scan Y', size=(210,10))]]
 
 
 
 outputTabCol = [
-            [sg.TabGroup([[sg.Tab('Scan X', tab1_layout), sg.Tab('Scan Y', tab2_layout)]])]
+            [sg.TabGroup([[sg.Tab('Scan X', tab1_layout,pad=((0,0),(30,0))), sg.Tab('Scan Y', tab2_layout, pad=((0,0),(30,0)))]], tab_location = 'topleft',pad=((0,0),(0,0)))]
             ]
 
 
 scanFrame = [
-            [sg.Frame('Scan', scanCol, title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('Scan', scanCol, pad=((5,5),(20,0)),title_color = titles, title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 
 runFrame = [
-            [sg.Frame('Run', runCol, title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('Run', runCol, pad=((5,5),(20,0)),title_color = titles, title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 xmlFrame = [
-            [sg.Frame('XML Report', xmlCol, pad=((0,150),(0,0)), title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('XML Report', xmlCol, title_color = titles, pad=((5,40),(0,0)), title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 runConfigFrame = [
-            [sg.Frame('Configuration of the Selected Run', runConfigCol, title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('Configuration of the Selected Run', runConfigCol, pad=((5,5),(0,5)), title_color = titles, title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 
 specColFrame = [
-            [sg.Frame('Tool Specification', specCol, title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('Tool Specification', specCol, pad=((5,5),(20,0)), title_color = titles,title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 toolDepColFrame = [
-            [sg.Frame('Tool Dependency', toolDepCol, title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('Tool Dependency', toolDepCol, pad=((5,5),(20,0)), title_color = titles, title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 outputFrame = [
-            [sg.Frame('Output', outputTabCol, title_location = 'nw',relief='ridge', font='none 16')]
+            [sg.Frame('Output', outputTabCol, title_color = titles, title_location = title_location,relief=relief, border_width = border_width,font='none 20')]
             ]
 
 
@@ -276,18 +311,18 @@ run_tab_layout =  [
                 ]
 
 tool_tab_layout =  [
-                [sg.Frame('Tool List', toolListCol, title_location = 'nw',relief='ridge', font='none 16')],
+                [sg.Frame('Tool List', toolListCol, pad=((5,5),(20,0)),title_color = titles, title_location = title_location,relief=relief, border_width = border_width, font='none 20')],
                 [sg.Column(specColFrame, vertical_alignment='top')],
                 [sg.Column(toolDepColFrame)]]
 
 help_tab_layout =  [
-                [sg.Frame('Help', helpView, title_location = 'nw',relief='ridge', font='none 16')],
+                [sg.Frame('Help', helpView, title_color = titles, title_location = title_location,relief=relief, border_width = border_width,font='none 20')],
                 ]
 
 
 #window layout
 layout = [
-        [sg.TabGroup([[sg.Tab('Run', run_tab_layout, font=('none 24')), sg.Tab('Tool', tool_tab_layout), sg.Tab('Help', help_tab_layout)]])]
+        [sg.TabGroup([[sg.Tab('Run', run_tab_layout, font=('none 24')), sg.Tab('Tool', tool_tab_layout), sg.Tab('Help', help_tab_layout)]],title_color='white',border_width=tab_border_width)]
 
         ]
 
@@ -303,7 +338,7 @@ while True:
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
-    
+        
     if event == '-addSpec-':
         if ((values['-spec1-'] != "") and (values['-spec2-'] != "") and (values['-spec3-'] != "")  and (values['-spec4-'] != "") and values['-spec5-'] != ""):
             data = data = {"Name of Tool": values['-spec1-'], "Description of Tool": values['-spec2-'], "Path of Tool": values['-spec3-']
