@@ -379,8 +379,8 @@ while True:
             collection = database['Tool List']
             collection.insert_one(data)
             window['-toolSpecificationFile-'].update('')
-            data = makeRunTable()
-            window.FindElement('-RUNTABLE-').Update(values=data)
+            data = makeToolConfigurationTable(3)
+            window.FindElement('-TABLE-').Update(values=data)
 
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
