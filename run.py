@@ -8,12 +8,21 @@ import string
 import pymongo
 from bson import ObjectId
 from datetime import datetime
+import xml2json
+import xmltodict
+import json
+import pprint
+from json2xml import json2xml
+from json2xml.utils import readfromurl, readfromstring, readfromjson
 
 theme = 'dark'
 azure = '#ECF0F1'
 whitelistIPS = ''
 toolList = []
+runList = []
+scanList = []
 scans = []
+reportList = []
 #toolList = updateToolListDropdown(toolList)
 #toolList2 = [1,2,3,4,5]
 
@@ -145,6 +154,7 @@ collection = database['Tool List']
 collectionScan = database['Scan']
 collectionEmptyScan = database['Scan List']
 collectionRun = database['Run List']
+collectionXML = database['XML Report']
 
 
 
@@ -191,8 +201,8 @@ def runCommand(cmd, timeout=None, window=None):
         #     read -p "$*"
     retval = p.wait(timeout)
     
-    if event == 'Stop':
-        print ('STOP')
+    # if event == 'Stop':
+    #     print ('STOP')
     return (retval, output)
 
 
@@ -214,6 +224,38 @@ def updateToolListDropdown(toolList):
             toolList.append(x['Name of Tool'])
     #print(toolList)
     return toolList
+
+def updateRunListDropdown(runList):
+    runList = []
+    for x in collectionRun.find():
+            #print(x['Name of Tool'])
+            runList.append(x['Name of Run'])
+    #print(toolList)
+    return runList
+
+def updateScanListDropdown(scanList, runName):
+    scanList = []
+    
+    query = {"Run Name": runName}
+    mydoc = collectionScan.find(query)
+    
+    #for x in collectionScan.find(query):
+            #print(x['Name of Tool'])
+            #scanList.append(x['Name of Run'])
+     #       print(x['Run Name'])
+    #print(toolList)
+    for x in mydoc:
+        scanList.append(x['Name of Scan'])
+
+    return scanList
+
+
+    # query = {"_id": uniqueID}
+    #     mydoc = collectionScan.find(query)
+
+    #     for x in mydoc:
+    #         data = x["XML"]
+
 
 
 def makeScanTable():
@@ -369,6 +411,12 @@ def updateScanTable2():
 
 
 toolList = updateToolListDropdown(toolList)
+runList = updateRunListDropdown(runList)
+
+
+#print(toolList)
+#print(runList)
+#print(scanList)
 
 # ------ Make the Table Data ------
 dataToolConfiguration = makeToolConfigurationTable(num_cols=3)
@@ -444,7 +492,7 @@ scanCol = [
               key='-SCANTABLE-',
               row_height=25, enable_events=True,
               tooltip='This is a table')],
-    [sg.Button('Start', button_color=(buttondefault)), sg.Button('Pause', button_color=(buttondefault)), sg.Button('Stop', button_color=(buttondefault))]
+    [sg.Button('Start', button_color=(buttondefault)), sg.Button('Pause', button_color=(buttondefault)), sg.Button('Stop', button_color=(buttondefault)),sg.Button('Run All', button_color=(buttondefault))]
     ]
 
 
@@ -483,7 +531,7 @@ runConfigCol = [
         
         #[sg.Text('Scan Type', font=('None 12'),size=(20,1)), sg.Listbox(values = toolList, text_color = 'white',background_color = 'black', select_mode = 'LISTBOX_SELECT_MODE_MULTIPLE',size=(20, 1), key= '-scanType-')],
         #[sg.Text('Scan Type', font=('None 12'),size=(20,1)), sg.Listbox(values = toolList2, size = (15, len(toolList2)), font=('None 12'), select_mode = 'LISTBOX_SELECT_MODE_MULTIPLE',size=(20, 1), key= '-scanTTT-')],
-        [sg.Text('Scan Type', font=('None 12'),size=(20,1)), sg.Listbox(toolList, select_mode = 'yes',no_scrollbar = True, background_color= table_background_color, size=(15, len(toolList)), key='-scanType-'),sg.Button('Add', key = '-addScan-')],
+        [sg.Text('Scan Type', font=('None 12'),size=(20,1)), sg.Listbox(toolList, select_mode = 'yes',no_scrollbar = True, background_color= table_background_color, size=(15, 8), key='-scanType-'),sg.Button('Add', key = '-addScan-')],
         [sg.Text('Scan', font=('None 12'),size=(20,1)),sg.InputText('', size=(60,1),font=('None 12'),key= '-scanNames-')],
         [sg.Text('OR',font=('None 16'))],
         [sg.Text('Run Configuration File', font=('None 12'),pad=((5,5),(0,0)),size=(20,1)), sg.InputText('', font=('None 12'),key= '-runConfigurationFile-'),
@@ -492,11 +540,13 @@ runConfigCol = [
         ]
 xmlCol = [
         #[sg.Text('XML Report', font=('none 16'),size=(20,1))],
-        [sg.Text('Report Name', font=('None 12'),pad=((5,5),(30,3)),size=(15,1)), sg.InputText('',font=('None 12'),size=(55,1),pad=((5,5),(30,3)))],
-        [sg.Text('Report Description', font=('None 12'),size=(15,1)), sg.InputText('',font=('None 12'),size=(55,1))],
-        [sg.Text('Run', font=('None 12'),size=(15,1)), sg.InputCombo(['X', 'Y'], font=('None 12'),size=(15, 1)),sg.Button('Add')],
-        [sg.Text('OR', font=('None 16'), size=(15,1))],
-        [sg.Text('Run', font=('None 12'),size=(15,1)), sg.InputCombo(['Run X', 'Run Y'], font=('None 12'),size=(15, 1)),sg.Text('Scan',font=('None 12'),), sg.InputCombo(['Scan X', 'Scan Y'],font=('None 12'), size=(15, 1)),sg.Button('Remove', button_color=(buttondefault)), sg.Button('Add')],
+        [sg.Text('Report Name', font=('None 12'),pad=((5,5),(30,3)),size=(15,1)), sg.InputText('',font=('None 12'),key='-reportName-',size=(55,1),pad=((5,5),(30,3)))],
+        [sg.Text('Report Description', font=('None 12'),size=(15,1)), sg.InputText('',font=('None 12'), key='-reportDescription-',size=(55,1))],
+        #[sg.Text('Run', font=('None 12'),size=(15,1)), sg.InputCombo(['X', 'Y'], font=('None 12'),size=(15, 1)),sg.Button('Add')],
+        #[sg.Text('OR', font=('None 16'), size=(15,1))],
+        [sg.Text('Run', font=('None 12'),size=(15,1)), sg.Listbox(runList, select_mode = 'LISTBOX_SELECT_MODE_SINGLE',no_scrollbar = True, background_color= table_background_color, size=(15, 8), enable_events=True,key='-runListXML-'),sg.Button('Load Scans', key = '-loadScans-'),sg.Listbox(scanList, select_mode = 'LISTBOX_SELECT_MODE_SINGLE',no_scrollbar = True, background_color= table_background_color, size=(15, 8), enable_events=True,key='-scanListXML-'),sg.Button('Add', key = '-addScan2-')],
+        #[sg.Text('Scan', font=('None 12'),size=(20,1)), sg.Listbox(scanList, select_mode = 'yes',no_scrollbar = True, background_color= table_background_color, size=(15, 8), enable_events=False,key='-scanListXML-'),sg.Button('Add', key = '-addScan-')],
+        #[sg.Text('Run', font=('None 12'),size=(15,1)), sg.InputCombo(['Run X', 'Run Y'], font=('None 12'),size=(15, 1)),sg.Text('Scan',font=('None 12'),), sg.InputCombo(['Scan X', 'Scan Y'],font=('None 12'), size=(15, 1)),sg.Button('Remove', button_color=(buttondefault)), sg.Button('Add')],
         [sg.Button('Generate',pad=((5,5),(30,5)), button_color=(buttondefault)), sg.Button('Cancel', button_color=(buttondefault), pad=((5,5),(30,5)))]
         ]
 
@@ -521,7 +571,7 @@ helpView = [
 
 
 outputTabCol = [
-            [sg.Output(size=(120,30), font=('none 16'), pad=((0,0),(30,0)),background_color='#1D1F21', text_color='white')]
+            #[sg.Output(size=(120,30), font=('none 16'), pad=((0,0),(30,0)),background_color='#1D1F21', text_color='white')]
             #[sg.TabGroup([[sg.Tab('Scan X', tab1_layout,pad=((0,0),(30,0))), sg.Tab('Scan Y', tab2_layout, pad=((0,0),(30,0)))]], tab_location = 'topleft',pad=((0,0),(0,0)))]
             ]
 
@@ -596,17 +646,183 @@ while True:
     #tableElement = window['-TABLE-'].get()
     #tableRow = values['-TABLE-']
     #print(tableRow)
+    
+    runSelected = window['-runListXML-'].get()
+    #print(type(runSelected))
+    #print(runSelected[0])
+    
+
+    if event == '-loadScans-':
+        runName = runSelected[0]
+        scanList = updateScanListDropdown(runList, runName)
+        window.FindElement('-scanListXML-').Update(values=scanList)
+
+    # if len(runSelected) != 0:
+    #     runName = runSelected[0]
+    #     scanList = updateScanListDropdown(runList, runName)
+    #     window.FindElement('-scanListXML-').Update(values=scanList)
+    
+    # if(runSelected[0] != None):
+    #     runName = runSelected[0]
+
+    #     scanList = updateScanListDropdown(runList, runName)
+    
+    #     window.FindElement('-scanListXML-').Update(values=scanList)
 
     
+    if event == '-addScan2-':
+        #get scan id from db
+        #print('ok')
+
+        runSelected = window['-runListXML-'].get()
+        runName = runSelected[0]
+        
+        #run index
+        rids = window['-runListXML-'].GetIndexes()
+        rids = rids[0]
+
+        #scan index
+        sids = window['-scanListXML-'].GetIndexes()
+        sids = sids[0] 
+       
+        query = {"Run Name": runName}
+        mydoc = collectionScan.find(query)
+
+        #get unique idfrom scantable 
+        uniqueID = mydoc[sids]
+        uniqueID = uniqueID['_id']
+        #print('ID: ')
+        #print(uniqueID)
+
+        reportList.append(uniqueID)
+        print('Report List: ')
+        print(reportList)
+
+         
+
+    
+
+    if event == 'Generate':
+        #get from database
+
+        print(reportList)
+        
+        reportName = values['-reportName-']
+        reportDescription = values['-reportDescription-']
+        
+        
+        
+        #tableElement = window['-SCANTABLE-'].get()
+        #tableRow = values['-SCANTABLE-']
+        #tableRow = tableRow[0]
+        #rowClicked = tableElement[tableRow]
+        
+        #uniqueID = rowClicked[8]
+        for i, x in enumerate(reportList):
+            
+            query = {"_id": x}
+            mydoc = collectionScan.find(query)
+
+            for c in mydoc:
+               data = c["XML"]
+            #print(x)
+
+            # for v in mydoc:
+            #     data = v["XML"]
+
+        #print(type(data))
+        
+
+        
+            #convert back to xml
+            doc2 = readfromstring(data)
+            doc3 = json2xml.Json2xml(doc2).to_xml()
+
+            #print(type(x))
+            #save to file
+            f = open(reportName + '_' + reportDescription + str(i) + '_.xml', "w")
+            
+            f.write(doc3)
+            f.close()
+
+            reportList = []
+    
+    if event == 'Run All':
+        
+        #getting all scans from table
+        tableElement = window['-SCANTABLE-'].get()
+        tableRow = values['-SCANTABLE-']
+
+        
+        for x in tableElement:
+            nameOfScan = x[1]
+            ipOfScan = x[5]
+            uniqueID = x[8]
+        
+            query = {"_id": uniqueID}
+       
+            mydoc = collectionScan.find(query)
+            
+            startTime = getStartTime()
+            
+            doc2 = collectionScan.find_one_and_update(
+                {"_id" : ObjectId(uniqueID)},
+                {"$set":
+                {"Start Time": startTime}
+                },upsert=True)
+
+            #update Table
+            updateScanTable2()
+            
+
+            whitelistIPS = ipOfScan.split()
+
+            for ips in whitelistIPS:
+                operation = nameOfScan + ' ' + ips
+                runCommand(cmd=operation, window=window)
+
+            endTime = getStartTime()
+
+            doc3 = collectionScan.find_one_and_update(
+                {"_id" : ObjectId(uniqueID)},
+                {"$set":
+                {"End Time": endTime}
+                },upsert=True)
+
+            updateScanTable2()
+
+            #file name
+            xmlFile = 'result.xml'
+
+            
+            #open file
+            with open(xmlFile) as fd:
+                doc = xmltodict.parse(fd.read())
+
+            #to string
+            x = json.dumps(doc)
+
+            #save xml report to database
+            doc4 = collectionScan.find_one_and_update(
+            {"_id" : ObjectId(uniqueID)},
+            {"$set":
+                {"XML": x}
+            },upsert=True)
+
+
+
+
+
     if event == 'Pause':
+        tableElement = window['-SCANTABLE-'].get()
+        print(tableElement)
+        # scanTypeList = values['-scanNames-'] 
+        # print('scan type list')
         
-        scanTypeList = values['-scanNames-'] 
-        print('scan type list')
+        # scanTypeList = scanTypeList
         
-        scanTypeList = scanTypeList
-        
-        print(scanTypeList)
-        print(len(scanTypeList))
+        # print(scanTypeList)
+        # print(len(scanTypeList))
 
 
     
@@ -622,9 +838,9 @@ while True:
 
         scans.append(tableRow[0])
         
-        print('scans')
-        print(scans)
-        print(len(scans))
+        #print('scans')
+        #print(scans)
+        #print(len(scans))
         
         window['-scanNames-'].update(scans)
     
@@ -693,7 +909,7 @@ while True:
         #print(operation)
         
         for ips in whitelistIPS:
-            operation = nameOfScan + ' ' + ips
+            operation = nameOfScan + ' ' + ips + ' -oX result.xml'
             runCommand(cmd=operation, window=window)
         
         #ip addresses 
@@ -707,6 +923,28 @@ while True:
         },upsert=True)
 
         updateScanTable2()
+
+        #save report to database per scan
+       
+        #file name
+        xmlFile = 'result.xml'
+
+        
+        #open file
+        with open(xmlFile) as fd:
+            doc = xmltodict.parse(fd.read())
+
+        #to string
+        x = json.dumps(doc)
+
+        #save xml report to database
+        doc4 = collectionScan.find_one_and_update(
+        {"_id" : ObjectId(uniqueID)},
+        {"$set":
+            {"XML": x}
+        },upsert=True)
+
+
 
     
     # if event == 'Stop':
@@ -730,6 +968,7 @@ while True:
                 (values['-spec4-'] != "") and values['-spec5-'] != "") and (values['-toolData1-'] != "") \
                 and (values['-toolData2-'] != "") and (values['-toolData3-'] != "") and (
                     values['-toolData4-'] != ""):
+            
             data = data = {"Name of Tool": values['-spec1-'], "Description of Tool": values['-spec2-'], "Path of Tool": values['-spec3-']
                            , "Option and Argument of Tool": values['-spec4-'], "Output Data Specification of Tool"
                            : values['-spec5-'], "Dependent Data": values['-toolData1-'], "Operator": values['-toolData2-'],
@@ -838,7 +1077,9 @@ while True:
             window['-scanType-'].update('')
 
             data = makeRunTable()
+            runList = updateRunListDropdown(runList)
             window.FindElement('-RUNTABLE-').Update(values=data)
+            window.FindElement('-runListXML-').Update(values=runList)
 
             #save Scan in Table
             collection2 = database['Scan']
@@ -874,7 +1115,9 @@ while True:
             collection.insert_one(data)
             window['-runConfigurationFile-'].update('')
             data = makeRunTable()
+            runList = updateRunListDropdown(runList)
             window.FindElement('-RUNTABLE-').Update(values=data)
+            window.FindElement('-runListXML-').Update(values=runList)
 
         else:
             sg.popup(title= "Missing input", custom_text= 'Please check the missing parameters')
