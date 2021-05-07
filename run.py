@@ -77,6 +77,8 @@ def get_multiple_data(collection):
     return list(data)
 
 #Database connections
+
+#connection = pymongo.MongoClient("mongodb+srv://Admin:maps1010@sea.pz2g0.mongodb.net/test")
 connection = pymongo.MongoClient('localhost', 27017)
 database = connection['mydb_01']
 collection = database['Tool List']
