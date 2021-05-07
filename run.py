@@ -78,7 +78,11 @@ def get_multiple_data(collection):
 
 
 ##Database
-connection = pymongo.MongoClient('localhost', 27017)
+
+#myclient = pymongo.MongoClient("cluster0-shard-00-00.mtrde.mongodb.net:27017")
+connection = pymongo.MongoClient("mongodb+srv://Admin:maps1010@sea.pz2g0.mongodb.net/test")
+
+#connection = pymongo.MongoClient('localhost', 27017)
 database = connection['mydb_01']
 collection = database['Tool List']
 collectionScan = database['Scan List']
